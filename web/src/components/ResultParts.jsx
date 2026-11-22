@@ -1,4 +1,7 @@
-import { motion } from 'motion/react';
+import { useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { SEVERITY, TIPS } from './signTips.js';
+import { lenis } from '../App.jsx';
 import CountUp from '../reactbits/CountUp.jsx';
 import BlurText from '../reactbits/BlurText.jsx';
 import DecryptedText from '../reactbits/DecryptedText.jsx';
@@ -45,9 +48,10 @@ export function VerdictCard({ r }) {
   );
 }
 
-export function HighlightedMessage({ r }) {
+// Each highlight is a button: clicking it puts that sign in focus (see FlagList and .focusing in styles.css).
+export function HighlightedMessage({ r, focus = null, onPick }) {
   const spans = [];
-  r.flags.forEach((f, i) => { if (f.end > f.start) spans.push({ ...f, n: i + 1 }); });
+  r.flags.forEach((f, i) => { if (f.end > f.start) spans.push({ ...f, idx: i }); });
   const chosen = [];
   for (const s of spans) if (chosen.every(c => s.end <= c.start || s.start >= c.end)) chosen.push(s);
   chosen.sort((a, b) => a.start - b.start);
@@ -55,12 +59,18 @@ export function HighlightedMessage({ r }) {
   let pos = 0;
   chosen.forEach((s, k) => {
     if (s.start > pos) parts.push(<span key={`t${k}`}>{r.text.slice(pos, s.start)}</span>);
+    const on = focus === s.idx;
     parts.push(
-      <motion.mark key={`m${k}`} className={s.severity} title={s.reason}
-        initial={{ backgroundSize: '0% 100%', opacity: 0.4 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 + k * 0.12, duration: 0.4 }}>
+      <motion.mark key={`m${k}`} className={`${s.severity} ${onPick ? 'pickable' : ''} ${on ? 'is-focus' : ''}`}
+        title={onPick ? `${s.label} – click for details` : s.reason}
+        role={onPick ? 'button' : undefined} tabIndex={onPick ? 0 : undefined}
+        onClick={onPick ? e => { e.stopPropagation(); onPick(on ? null : s.idx); } : undefined}
+        onKeyDown={onPick ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(on ? null : s.idx); } } : undefined}
+        initial={{ opacity: 0.4 }} animate={{ opacity: focus != null && !on ? 0.3 : 1, scale: on ? 1.06 : 1 }}
+        transition={{ delay: on ? 0 : 0.25 + k * 0.12, duration: 0.35, type: on ? 'spring' : 'tween', stiffness: 400, damping: 18 }}>
         {r.text.slice(s.start, s.end)}
       </motion.mark>,
-      <sup key={`s${k}`}>{s.n}</sup>,
+      <sup key={`s${k}`}>{s.idx + 1}</sup>,
     );
     pos = s.end;
   });
@@ -75,25 +85,77 @@ export function Legend() {
       <span><i style={{ background: 'var(--warn-soft)', boxShadow: 'inset 0 -2px 0 var(--warn)' }} />warning sign</span>
       <span><i style={{ background: 'var(--low-soft)', boxShadow: 'inset 0 -2px 0 var(--low-line)' }} />minor sign</span>
       <span><i style={{ background: 'var(--ok-soft)', boxShadow: 'inset 0 -2px 0 var(--ok)' }} />reassuring sign</span>
-      <span>· hover a highlight for the reason</span>
+      <span>· click a highlight to focus on it</span>
     </div>
   );
 }
 
-export function FlagList({ r }) {
+export function FlagList({ r, focus = null, onPick }) {
+  const refs = useRef([]);
+  // when a sign comes into focus, glide its card into the middle of the screen
+  useEffect(() => {
+    const el = focus != null && refs.current[focus];
+    if (!el) return;
+    const t = setTimeout(() => {
+      const offset = -(window.innerHeight / 2) + el.offsetHeight / 2;
+      if (lenis) lenis.scrollTo(el, { offset, duration: 0.9 });
+      else el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 60);
+    return () => clearTimeout(t);
+  }, [focus]);
+
   if (!r.flags.length) return <p className="muted">No specific warning or reassuring signs; the verdict comes from the model's reading of the wording.</p>;
+  const n = r.flags.length;
   return (
     <div className="stack" style={{ gap: 10 }}>
-      {r.flags.map((f, i) => (
-        <motion.div key={i} className={`flag ${f.severity}`} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.15 + i * 0.07, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
-          <span className="n">{i + 1}</span>
-          <div>
-            <b>{f.label} {f.text.trim() && <q>{f.text.slice(0, 70)}</q>}</b>
-            <p>{f.reason}</p>
-          </div>
-        </motion.div>
-      ))}
+      {r.flags.map((f, i) => {
+        const on = focus === i;
+        const sev = SEVERITY[f.severity];
+        return (
+          <motion.div key={i} ref={el => { refs.current[i] = el; }} layout
+            className={`flag ${f.severity} ${onPick ? 'pickable' : ''} ${on ? 'is-focus' : ''}`}
+            onClick={onPick ? e => { e.stopPropagation(); if (!on) onPick(i); } : undefined}
+            role={onPick ? 'button' : undefined} tabIndex={onPick && !on ? 0 : undefined}
+            onKeyDown={onPick ? e => { if (!on && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onPick(i); } } : undefined}
+            initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: focus == null ? 0.15 + i * 0.07 : 0, duration: 0.45, ease: [0.22, 1, 0.36, 1], layout: { duration: 0.35 } }}>
+            <span className="n">{i + 1}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <b>{f.label} {!on && f.text.trim() && <q>{f.text.slice(0, 70)}</q>}</b>
+              <AnimatePresence initial={false}>
+                {on ? (
+                  <motion.div key="detail" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }} style={{ overflow: 'hidden' }}>
+                    <span className={`tag ${sev.tone}`} style={{ marginTop: 10 }}>{f.severity === 'good' ? '✓' : '!'} {sev.label}</span>
+                    {f.text.trim() && <div className="focus-quote">“{f.text}”</div>}
+                    <div className="focus-row">
+                      <div className="focus-k">{f.severity === 'good' ? 'Why it is reassuring' : 'Why it is a threat'}</div>
+                      <p>{f.reason}</p>
+                    </div>
+                    {TIPS[f.rule] && f.severity !== 'good' && (
+                      <div className="focus-row genuine">
+                        <div className="focus-k">What a genuine message does instead</div>
+                        <p>{TIPS[f.rule]}</p>
+                      </div>
+                    )}
+                    {TIPS[f.rule] && f.severity === 'good' && (
+                      <div className="focus-row genuine"><div className="focus-k">In plain words</div><p>{TIPS[f.rule]}</p></div>
+                    )}
+                    <div className="row" style={{ marginTop: 14, gap: 8 }}>
+                      <button className="btn small ghost" onClick={e => { e.stopPropagation(); onPick((i - 1 + n) % n); }}>← Previous</button>
+                      <button className="btn small ghost" onClick={e => { e.stopPropagation(); onPick((i + 1) % n); }}>Next →</button>
+                      <button className="btn small" onClick={e => { e.stopPropagation(); onPick(null); }}>Done</button>
+                      <span className="small muted">{i + 1} of {n} · ← → keys · Esc</span>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.p key="short" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>{f.reason}</motion.p>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        );
+      })}
     </div>
   );
 }

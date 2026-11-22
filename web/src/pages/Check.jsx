@@ -41,6 +41,20 @@ export default function Check({ onChange }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [tab, setTab] = useState('todo');
+  const [focus, setFocus] = useState(null);   // index of the sign in focus mode (null = off)
+
+  // keyboard: Esc leaves focus mode, ← → walk through the signs
+  useEffect(() => {
+    if (focus == null || !r) return undefined;
+    const n = r.flags.length;
+    const onKey = e => {
+      if (e.key === 'Escape') setFocus(null);
+      else if (e.key === 'ArrowRight') { e.preventDefault(); setFocus(f => (f + 1) % n); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); setFocus(f => (f - 1 + n) % n); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [focus, r]);
   const [metrics, setMetrics] = useState(null);
   const resultRef = useRef(null);
 
@@ -51,7 +65,7 @@ export default function Check({ onChange }) {
     setBusy(true); setErr('');
     try {
       const res = await api.analyze(text, sender);
-      setR(res); setTab('todo'); onChange?.();
+      setR(res); setTab('todo'); setFocus(null); onChange?.();
       setTimeout(() => {
         if (resultRef.current) {
           if (lenis) lenis.scrollTo(resultRef.current, { offset: -90, duration: 1.4 });
@@ -107,10 +121,16 @@ export default function Check({ onChange }) {
           <motion.section key={r.text + r.verdict} className="wrap" style={{ paddingTop: 28 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <VerdictCard r={r} />
             {r.saved_to_diary && <p className="small muted" style={{ margin: '10px 4px 0' }}>📔 Saved to your Scam Diary (masked: no numbers, codes or clickable links).</p>}
-            <div className="grid-2" style={{ marginTop: 20 }}>
-              <div className="card">
-                <div className="kicker">The message, with suspicious parts marked</div>
-                <HighlightedMessage r={r} />
+            <AnimatePresence>
+              {focus != null && (
+                <motion.div className="focus-overlay" onClick={() => setFocus(null)} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }} transition={{ duration: 0.3 }} aria-hidden="true" />
+              )}
+            </AnimatePresence>
+            <div className={`grid-2 result-grid ${focus != null ? 'focusing' : ''}`} style={{ marginTop: 20 }}>
+              <div className="card message-card">
+                <div className="kicker">{r.verdict === 'SAFE' ? 'The message, with the signs Kavach found' : 'The message, with suspicious parts marked'} · click any highlight</div>
+                <HighlightedMessage r={r} focus={focus} onPick={setFocus} />
                 <Legend />
                 <Decoded r={r} />
                 {r.links.length > 0 && (<div style={{ marginTop: 22 }}><div className="kicker">🔗 Links – inspected, never opened</div><LinkCards r={r} /></div>)}
@@ -119,7 +139,7 @@ export default function Check({ onChange }) {
                 <div className="kicker" style={{ margin: '6px 4px 12px' }}>
                   Why? {r.flags.filter(f => f.severity !== 'good').length} warning signs · {r.flags.filter(f => f.severity === 'good').length} reassuring
                 </div>
-                <FlagList r={r} />
+                <FlagList r={r} focus={focus} onPick={setFocus} />
                 {r.sender_note && <p className="small muted" style={{ marginTop: 10 }}>Sender: {r.sender_note}</p>}
               </div>
             </div>
