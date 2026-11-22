@@ -4,3 +4,4 @@ __pycache__/
 local_data/
 .pytest_cache/
 data/raw/sms.zip
+web/node_modules/
