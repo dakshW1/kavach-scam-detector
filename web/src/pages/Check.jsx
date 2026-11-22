@@ -1,15 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 
 import BlurText from '../reactbits/BlurText.jsx';
 import ShinyText from '../reactbits/ShinyText.jsx';
 import StarBorder from '../reactbits/StarBorder.jsx';
 import SpotlightCard from '../reactbits/SpotlightCard.jsx';
-import CountUp from '../reactbits/CountUp.jsx';
 import VantaNet from '../components/VantaNet.jsx';
 import Reveal from '../components/Reveal.jsx';
 import Tabs from '../components/Tabs.jsx';
-import { Decoded, FlagList, HighlightedMessage, Legend, LinkCards, VerdictCard } from '../components/ResultParts.jsx';
+import { Decoded, FlagList, HighlightedMessage, Legend, LinkCards, VerdictCard, mergeFlags } from '../components/ResultParts.jsx';
 import { ReportTab, GuideTab, IntelTab, HoodTab, TodoTab } from '../components/ResultTabs.jsx';
 import { api } from '../api.js';
 import { lenis } from '../App.jsx';
@@ -24,13 +23,9 @@ const EXAMPLES = {
   'Genuine debit alert': ['Rs.500.00 debited from A/c XX1234 on 22-11-26 to VPA swiggy@icici (UPI Ref No 412345678901). Not you? Call 18001234567 to block. -HDFC Bank', 'VM-HDFCBK-S'],
 };
 
-const TRICKS = ['KYC by SMS link', 'L0TT3RY', 'digital arrest', 'bit.ly/…', 'sbi-kyc-update.xyz', 'processing fee', 'K.Y.C',
-  'bijli kat jayega', 'part-time task job', 'Hi Mum, new number', 'enter PIN to receive', 'AnyDesk', 'hdfcbnak.com', 'loan without CIBIL',
-  'parcel held at customs', 'इनाम जीता है'];
-
 const RESULT_TABS = [
-  { id: 'todo', label: 'What to do' }, { id: 'report', label: 'Report this scam' }, { id: 'guide', label: 'How this scam works' },
-  { id: 'intel', label: 'Happening to others?' }, { id: 'hood', label: 'Under the hood' },
+  { id: 'todo', label: 'What to do' }, { id: 'report', label: 'Report this scam' },
+  { id: 'guide', label: 'How this scam works' }, { id: 'hood', label: 'For experts' },
 ];
 
 export default function Check({ onChange }) {
@@ -46,7 +41,7 @@ export default function Check({ onChange }) {
   // keyboard: Esc leaves focus mode, ← → walk through the signs
   useEffect(() => {
     if (focus == null || !r) return undefined;
-    const n = r.flags.length;
+    const n = mergeFlags(r.flags).length;
     const onKey = e => {
       if (e.key === 'Escape') setFocus(null);
       else if (e.key === 'ArrowRight') { e.preventDefault(); setFocus(f => (f + 1) % n); }
@@ -57,6 +52,13 @@ export default function Check({ onChange }) {
   }, [focus, r]);
   const [metrics, setMetrics] = useState(null);
   const resultRef = useRef(null);
+  const tabsRef = useRef(null);
+  // signs that highlight exactly the same words are shown once (the most serious one)
+  const rv = useMemo(() => (r ? { ...r, flags: mergeFlags(r.flags) } : null), [r]);
+  const openReport = () => {
+    setTab('report');
+    setTimeout(() => { if (tabsRef.current) { if (lenis) lenis.scrollTo(tabsRef.current, { offset: -90 }); else tabsRef.current.scrollIntoView({ behavior: 'smooth' }); } }, 50);
+  };
 
   useEffect(() => { api.metrics().then(setMetrics).catch(() => {}); }, []);
 
@@ -77,7 +79,7 @@ export default function Check({ onChange }) {
   };
 
   const pick = name => { const [t, s] = EXAMPLES[name]; setText(t); setSender(s); setErr(''); };
-  const fin = metrics?.final;
+  const fin = metrics?.final_v2 || metrics?.final;
 
   return (
     <>
@@ -109,17 +111,11 @@ export default function Check({ onChange }) {
         </div>
       </section>
 
-      <div className="marquee-wrap" aria-hidden="true">
-        <div className="marquee">
-          {[...TRICKS, ...TRICKS].map((t, i) => <span key={i}><b>✕</b> {t}</span>)}
-        </div>
-      </div>
-
       <div ref={resultRef} />
       <AnimatePresence mode="wait">
-        {r && (
-          <motion.section key={r.text + r.verdict} className="wrap" style={{ paddingTop: 28 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <VerdictCard r={r} />
+        {rv && (
+          <motion.section key={rv.text + rv.verdict} className="wrap" style={{ paddingTop: 28 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <VerdictCard r={rv} onReport={openReport} />
             {r.saved_to_diary && <p className="small muted" style={{ margin: '10px 4px 0' }}>📔 Saved to your Scam Diary (masked: no numbers, codes or clickable links).</p>}
             <AnimatePresence>
               {focus != null && (
@@ -129,28 +125,28 @@ export default function Check({ onChange }) {
             </AnimatePresence>
             <div className={`grid-2 result-grid ${focus != null ? 'focusing' : ''}`} style={{ marginTop: 20 }}>
               <div className="card message-card">
-                <div className="kicker">{r.verdict === 'SAFE' ? 'The message, with the signs Kavach found' : 'The message, with suspicious parts marked'} · click any highlight</div>
-                <HighlightedMessage r={r} focus={focus} onPick={setFocus} />
+                <div className="kicker">The message · tap a highlight to see why</div>
+                <HighlightedMessage r={rv} focus={focus} onPick={setFocus} />
                 <Legend />
-                <Decoded r={r} />
-                {r.links.length > 0 && (<div style={{ marginTop: 22 }}><div className="kicker">🔗 Links – inspected, never opened</div><LinkCards r={r} /></div>)}
+                <Decoded r={rv} />
+                {rv.links.length > 0 && (<div style={{ marginTop: 22 }}><div className="kicker">Links – checked, never opened</div><LinkCards r={rv} /></div>)}
               </div>
               <div>
                 <div className="kicker" style={{ margin: '6px 4px 12px' }}>
-                  Why? {r.flags.filter(f => f.severity !== 'good').length} warning signs · {r.flags.filter(f => f.severity === 'good').length} reassuring
+                  {(() => { const bad = rv.flags.filter(f => f.severity !== 'good').length; const ok = rv.flags.length - bad;
+                    return [bad && `${bad} warning sign${bad > 1 ? 's' : ''}`, ok && `${ok} good sign${ok > 1 ? 's' : ''}`].filter(Boolean).join(' · ') || 'Why?'; })()}
                 </div>
-                <FlagList r={r} focus={focus} onPick={setFocus} />
+                <FlagList r={rv} focus={focus} onPick={setFocus} />
                 {r.sender_note && <p className="small muted" style={{ marginTop: 10 }}>Sender: {r.sender_note}</p>}
               </div>
             </div>
-            <div style={{ marginTop: 28 }}>
+            <div style={{ marginTop: 28 }} ref={tabsRef}>
               <Tabs tabs={RESULT_TABS} active={tab} onChange={setTab} id="result" />
               <AnimatePresence mode="wait">
                 <motion.div key={tab} className="card" style={{ marginTop: 14 }} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.25 }}>
                   {tab === 'todo' && <TodoTab r={r} />}
                   {tab === 'report' && <ReportTab r={r} sender={sender} channel={channel} />}
-                  {tab === 'guide' && <GuideTab r={r} />}
-                  {tab === 'intel' && <IntelTab r={r} sender={sender} onChange={onChange} />}
+                  {tab === 'guide' && <><GuideTab r={r} /><IntelTab r={r} sender={sender} onChange={onChange} /></>}
                   {tab === 'hood' && <HoodTab r={r} />}
                 </motion.div>
               </AnimatePresence>
@@ -169,8 +165,8 @@ export default function Check({ onChange }) {
         <div className="grid-4">
           {[
             ['01', '🕵️', 'Undo the disguise', 'L0TT3RY → lottery, K.Y.C → kyc, Cyrillic lookalikes and invisible characters removed.'],
-            ['02', '🚩', 'Spot the tactics', '20 red-flag rules for OTP requests, threats, urgency, prizes, fees, fake jobs and “digital arrest” – in English, Hinglish and Hindi.'],
-            ['03', '🔗', 'Inspect every link', 'Compared with official domains of 41 banks, brands and government sites. Never opened.'],
+            ['02', '🚩', 'Spot the tactics', 'Rules for OTP requests, threats, urgency, prizes, fees, fake jobs, donations and “digital arrest” – in English, Hinglish and Hindi.'],
+            ['03', '🔗', 'Inspect every link', 'Compared with the official domains of banks, brands and government sites; free site builders are never trusted. Never opened.'],
             ['04', '🧠', 'Weigh it all', 'A small TF-IDF + logistic regression model gives a calibrated confidence and the scam category.'],
           ].map(([n, icon, h, p], i) => (
             <Reveal key={n} delay={i * 0.08}>
@@ -192,10 +188,10 @@ export default function Check({ onChange }) {
               <p className="muted">The app blocks its own internet access at start-up. The only online feature sends just the scam type – never your message.</p>
             </div>
             <div className="grid-4" style={{ position: 'relative', zIndex: 2 }}>
-              <div className="stat"><div className="v"><CountUp to={0} from={9} duration={1.2} /></div><div className="l">network calls while checking (tested)</div></div>
-              <div className="stat"><div className="v"><CountUp to={fin ? Math.round(fin.ms_per_message) : 20} duration={1.2} /> ms</div><div className="l">to check a message on a laptop CPU</div></div>
-              <div className="stat"><div className="v"><CountUp to={fin ? Math.round(fin.caught_scam_or_suspicious * 100) : 100} duration={1.4} />%</div><div className="l">of scams caught in the untouched final test</div></div>
-              <div className="stat"><div className="v"><CountUp to={metrics ? metrics.model.size_mb : 1.2} decimals={1} duration={1.2} /> MB</div><div className="l">model size – no cloud AI, no API keys</div></div>
+              <div className="stat"><div className="v">0</div><div className="l">network calls while checking (tested)</div></div>
+              <div className="stat"><div className="v">{fin ? Math.round(fin.ms_per_message) : 20} ms</div><div className="l">to check a message on a laptop CPU</div></div>
+              <div className="stat"><div className="v">{fin ? `${fin.verdicts.scam.SCAM + fin.verdicts.scam.SUSPICIOUS}/${fin.n_scam}` : '–'}</div><div className="l">scams caught in the untouched final test</div></div>
+              <div className="stat"><div className="v">{fin ? `${fin.verdicts.safe.SCAM}/${fin.n_safe}` : '–'}</div><div className="l">genuine messages wrongly called a scam there</div></div>
             </div>
           </div>
         </Reveal>

@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import BlurText from '../reactbits/BlurText.jsx';
-import CountUp from '../reactbits/CountUp.jsx';
 import { api, download, pct } from '../api.js';
 
 function parse(name, raw) {
@@ -44,7 +42,7 @@ export default function Batch() {
     <div className="wrap">
       <div className="page-title">
         <div className="kicker">Many messages at once</div>
-        <h1><BlurText text="Batch check" delay={80} /></h1>
+        <h1>Batch check</h1>
         <p>Check an exported SMS backup or a list of messages. Files are read in your browser and checked on this computer.</p>
       </div>
       <div className="card stack" style={{ marginTop: 20 }}>
@@ -56,9 +54,9 @@ export default function Batch() {
       {rows && (
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
           <div className="grid-3" style={{ marginTop: 16 }}>
-            <div className="stat"><div className="v" style={{ color: 'var(--bad)' }}><CountUp to={count('SCAM')} duration={1} /></div><div className="l">SCAM</div></div>
-            <div className="stat"><div className="v" style={{ color: 'var(--warn)' }}><CountUp to={count('SUSPICIOUS')} duration={1} /></div><div className="l">SUSPICIOUS</div></div>
-            <div className="stat"><div className="v" style={{ color: 'var(--ok)' }}><CountUp to={count('SAFE')} duration={1} /></div><div className="l">SAFE</div></div>
+            <div className="stat"><div className="v" style={{ color: 'var(--bad)' }}>{count('SCAM')}</div><div className="l">SCAM</div></div>
+            <div className="stat"><div className="v" style={{ color: 'var(--warn)' }}>{count('SUSPICIOUS')}</div><div className="l">SUSPICIOUS</div></div>
+            <div className="stat"><div className="v" style={{ color: 'var(--ok)' }}>{count('SAFE')}</div><div className="l">SAFE</div></div>
           </div>
           <div className="card table-wrap" style={{ marginTop: 16 }}>
             <table className="t"><thead><tr><th>Verdict</th><th>Confidence</th><th>Category</th><th>Top warning signs</th><th>Message</th></tr></thead>

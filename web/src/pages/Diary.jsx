@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import CountUp from '../reactbits/CountUp.jsx';
-import BlurText from '../reactbits/BlurText.jsx';
 import Reveal from '../components/Reveal.jsx';
 import { api, pct } from '../api.js';
 
@@ -49,7 +47,7 @@ export default function Diary({ onChange }) {
     <div className="wrap">
       <div className="page-title">
         <div className="kicker">Optional · only on this computer</div>
-        <h1><BlurText text="Your Scam Diary" delay={80} /></h1>
+        <h1>Your Scam Diary</h1>
         <p>See which scams were aimed at you, and warn your family. Private details are masked before anything is saved.</p>
       </div>
 
@@ -77,9 +75,9 @@ export default function Diary({ onChange }) {
       ) : (
         <>
           <div className="grid-4" style={{ marginTop: 24 }}>
-            <div className="stat"><div className="v"><CountUp to={st.total} duration={1} /></div><div className="l">scam messages logged</div></div>
-            <div className="stat"><div className="v" style={{ color: 'var(--bad)' }}><CountUp to={st.scam} duration={1} /></div><div className="l">marked SCAM</div></div>
-            <div className="stat"><div className="v" style={{ color: 'var(--warn)' }}><CountUp to={st.suspicious} duration={1} /></div><div className="l">marked suspicious</div></div>
+            <div className="stat"><div className="v">{st.total}</div><div className="l">scam messages logged</div></div>
+            <div className="stat"><div className="v" style={{ color: 'var(--bad)' }}>{st.scam}</div><div className="l">marked SCAM</div></div>
+            <div className="stat"><div className="v" style={{ color: 'var(--warn)' }}>{st.suspicious}</div><div className="l">marked suspicious</div></div>
             <div className="stat"><div className="v" style={{ fontSize: '1.6rem', paddingTop: 10 }}>{topType}</div><div className="l">most common type</div></div>
           </div>
           <div className="grid-2" style={{ marginTop: 16 }}>

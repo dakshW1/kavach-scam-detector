@@ -4,7 +4,6 @@ import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-import ClickSpark from './reactbits/ClickSpark.jsx';
 import Nav from './components/Nav.jsx';
 import Footer from './components/Footer.jsx';
 import Check from './pages/Check.jsx';
@@ -17,13 +16,14 @@ import { api } from './api.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// main = always visible in the nav; the rest sit under "More"
 export const PAGES = [
-  { id: 'check', label: 'Check', comp: Check },
-  { id: 'diary', label: 'Scam Diary', comp: Diary },
-  { id: 'library', label: 'Library', comp: Library },
-  { id: 'fool', label: 'Try to fool it', comp: Fool },
-  { id: 'batch', label: 'Batch', comp: Batch },
-  { id: 'results', label: 'Results & privacy', comp: Results },
+  { id: 'check', label: 'Check', comp: Check, main: true },
+  { id: 'library', label: 'Scam Library', comp: Library, main: true },
+  { id: 'diary', label: 'My Scam Diary', comp: Diary, main: true },
+  { id: 'fool', label: 'Try to fool it', comp: Fool, hint: 'See how disguised scams are still caught' },
+  { id: 'batch', label: 'Check many messages', comp: Batch, hint: 'Upload a list or SMS backup' },
+  { id: 'results', label: 'How accurate is it?', comp: Results, hint: 'Test results and privacy proof' },
 ];
 
 const pageFromHash = () => {
@@ -75,7 +75,7 @@ export default function App() {
 
   const Page = PAGES.find(p => p.id === page).comp;
   return (
-    <ClickSpark sparkColor="#8fcba8" sparkSize={9} sparkRadius={22} sparkCount={8} duration={420}>
+    <>
       <Nav page={page} go={go} privacy={privacy} />
       <AnimatePresence mode="wait">
         <motion.main
@@ -89,6 +89,6 @@ export default function App() {
         </motion.main>
       </AnimatePresence>
       <Footer go={go} />
-    </ClickSpark>
+    </>
   );
 }

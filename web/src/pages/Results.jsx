@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
-import BlurText from '../reactbits/BlurText.jsx';
-import CountUp from '../reactbits/CountUp.jsx';
 import SpotlightCard from '../reactbits/SpotlightCard.jsx';
 import Reveal from '../components/Reveal.jsx';
 import Reliability from '../components/Reliability.jsx';
 import { api } from '../api.js';
 
 const p = x => (x == null ? '–' : `${(x * 100).toFixed(1)}%`);
-const NAMES = { final: 'Final test – hand-written, never used for tuning', challenge: 'Challenge set – hand-written', test: 'Held-out templates + UCI messages' };
+const NAMES = { final_v2: 'Final test v2 – hand-written, untouched', final: 'Final test v1 – hand-written', tester: 'Messages typed by 5 testers', challenge: 'Challenge set – hand-written', test: 'Held-out templates + UCI messages' };
 
 export default function Results() {
   const [m, setM] = useState(null);
@@ -15,29 +13,29 @@ export default function Results() {
   const [showMistakes, setShowMistakes] = useState(false);
   useEffect(() => { api.metrics().then(setM); api.privacy().then(setPriv); }, []);
   if (!m) return null;
-  const f = m.final;
+  const f = m.final_v2 || m.final;
   const rob = m.robustness;
 
   return (
     <div className="wrap">
       <div className="page-title">
         <div className="kicker">Honest numbers</div>
-        <h1><BlurText text="Results & privacy" delay={80} /></h1>
-        <p>Every number is on messages the model never saw during training. The final test set was written before tuning and never used to improve the model.</p>
+        <h1>Results & privacy</h1>
+        <p>Every number is on messages the model never saw during training. Final test v2 was written before the latest fixes and never used to improve the model; the tester and challenge sets were used to find mistakes, so they are less strict.</p>
       </div>
 
       <div className="grid-4" style={{ marginTop: 20 }}>
-        <div className="stat"><div className="v"><CountUp to={Math.round(f.caught_scam_or_suspicious * 100)} duration={1.3} />%</div><div className="l">scams caught in the final test ({f.n_scam} scams)</div></div>
-        <div className="stat"><div className="v"><CountUp to={Math.round(f.accuracy * 1000) / 10} decimals={1} duration={1.3} />%</div><div className="l">accuracy, final test ({f.n} messages)</div></div>
-        <div className="stat"><div className="v"><CountUp to={Math.round(f.safe_marked_scam * 1000) / 10} decimals={1} duration={1.3} />%</div><div className="l">genuine messages wrongly marked SCAM</div></div>
-        <div className="stat"><div className="v"><CountUp to={Math.round(m.calibration_all.ece * 1000) / 1000} decimals={3} duration={1.3} /></div><div className="l">calibration error (0 = perfectly honest confidence)</div></div>
+        <div className="stat"><div className="v">{Math.round(f.caught_scam_or_suspicious * 100)}%</div><div className="l">scams caught in the final test ({f.n_scam} scams)</div></div>
+        <div className="stat"><div className="v">{(Math.round(f.accuracy * 1000) / 10).toFixed(1)}%</div><div className="l">accuracy, final test ({f.n} messages)</div></div>
+        <div className="stat"><div className="v">{(Math.round(f.safe_marked_scam * 1000) / 10).toFixed(1)}%</div><div className="l">genuine messages wrongly marked SCAM</div></div>
+        <div className="stat"><div className="v">{(Math.round(m.calibration_all.ece * 1000) / 1000).toFixed(3)}</div><div className="l">calibration error (0 = perfectly honest confidence)</div></div>
       </div>
 
       <Reveal>
         <div className="card table-wrap" style={{ marginTop: 16 }}>
           <table className="t">
             <thead><tr><th>Test set</th><th>Msgs</th><th>Accuracy</th><th>Scams caught</th><th>Precision</th><th>Recall</th><th>Genuine → SCAM</th><th>Genuine → suspicious</th><th>Category acc.</th></tr></thead>
-            <tbody>{['final', 'challenge', 'test'].map(k => (
+            <tbody>{['final_v2', 'final', 'tester', 'challenge', 'test'].filter(k => m[k]).map(k => (
               <tr key={k}><td><b>{NAMES[k]}</b></td><td className="num">{m[k].n}</td><td className="num">{p(m[k].accuracy)}</td><td className="num">{p(m[k].caught_scam_or_suspicious)}</td>
                 <td className="num">{p(m[k].precision)}</td><td className="num">{p(m[k].recall)}</td><td className="num">{p(m[k].safe_marked_scam)}</td>
                 <td className="num">{p(m[k].safe_marked_suspicious)}</td><td className="num">{p(m[k].category_accuracy)}</td></tr>))}
@@ -79,7 +77,7 @@ export default function Results() {
         <button className="btn ghost" onClick={() => setShowMistakes(s => !s)}>{showMistakes ? 'Hide' : 'Show'} where it still goes wrong</button>
         {showMistakes && (
           <ul className="clean small" style={{ marginTop: 14 }}>
-            {['final', 'challenge'].flatMap(k => (m[k].mistakes || []).map((x, i) => (
+            {['final_v2', 'final', 'tester', 'challenge'].filter(k => m[k]).flatMap(k => (m[k].mistakes || []).map((x, i) => (
               <li key={k + i}><span className="tag neutral">{k}</span> true <b>{x.label}</b>{x.category && ` (${x.category})`} → said <b>{x.verdict}</b>{x.pred_category && ` (${x.pred_category})`}, p={x.p_scam}: {x.text}</li>)))}
           </ul>
         )}
@@ -120,8 +118,8 @@ export default function Results() {
           <div className="kicker">Data used</div>
           <ul className="clean">
             <li><b>UCI SMS Spam Collection</b> (CC BY 4.0): 2,500 genuine personal messages; prize/claim spam as Lottery/Prize scams.</li>
-            <li><b>Indian messages from 235 hand-written templates</b> (124 scam, 111 genuine) in English, Hinglish and Hindi – synthetic, split by template.</li>
-            <li><b>Two hand-written test sets</b> (101 + 72) with different wording, never used for training.</li>
+            <li><b>Indian messages from 376 hand-written templates</b> (175 scam, 201 genuine) in English, Hinglish and Hindi – synthetic, split by template. The third batch was written to cover gaps found by five testers.</li>
+            <li><b>Four hand-written / real-user test sets</b> (final v2: 68, final v1: 72, tester messages: 137, challenge: 101), never used for training.</li>
           </ul>
         </div></Reveal>
         <Reveal><div className="card">

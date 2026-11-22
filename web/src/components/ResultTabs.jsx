@@ -38,7 +38,8 @@ export function md(s) {
 }
 
 export function ReportTab({ r, sender, channel }) {
-  const [f, setF] = useState({ sender, received: '', channel, lost_money: false, amount_lost: '', transaction_ref: '', notes: '' });
+  const [f, setF] = useState({ sender, received: '', channel, lost_money: false, amount_lost: '', transaction_ref: '',
+    debit_time: '', victim_bank: '', beneficiary: '', notes: '' });
   const [summary, setSummary] = useState(null);
   const [busy, setBusy] = useState('');
   const set = (k, v) => setF(p => ({ ...p, [k]: v }));
@@ -49,8 +50,8 @@ export function ReportTab({ r, sender, channel }) {
 
   return (
     <div className="stack">
-      <p className="muted">Create an <b style={{ color: 'var(--ink)' }}>evidence report</b> to attach to a complaint (cybercrime.gov.in, your bank, Chakshu).
-        It is made on this computer, kept in memory, and saved only if you download it.</p>
+      <p className="muted">Make an <b style={{ color: 'var(--ink)' }}>evidence report</b> for a complaint (cybercrime.gov.in, your bank, Chakshu). It lists the money trail
+        investigators need. Made on this computer and saved only if you download it. <b style={{ color: 'var(--ink)' }}>Do not delete the original message.</b></p>
       <div className="grid-3">
         <label className="field">Sender number / ID<input className="input" value={f.sender} onChange={e => set('sender', e.target.value)} /></label>
         <label className="field">Received on (date &amp; time)<input className="input" value={f.received} placeholder="e.g. 23 Nov 2026, 10:15 AM" onChange={e => set('received', e.target.value)} /></label>
@@ -58,9 +59,12 @@ export function ReportTab({ r, sender, channel }) {
       </div>
       <label className="check"><input type="checkbox" checked={f.lost_money} onChange={e => set('lost_money', e.target.checked)} /> I lost money because of this message</label>
       {f.lost_money && (
-        <motion.div className="grid-2" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-          <label className="field">Amount lost<input className="input" value={f.amount_lost} onChange={e => set('amount_lost', e.target.value)} /></label>
-          <label className="field">Transaction / UPI reference<input className="input" value={f.transaction_ref} onChange={e => set('transaction_ref', e.target.value)} /></label>
+        <motion.div className="grid-3" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+          <label className="field">Amount lost<input className="input" placeholder="e.g. Rs 15,000" value={f.amount_lost} onChange={e => set('amount_lost', e.target.value)} /></label>
+          <label className="field">Transaction ref. (UTR / UPI ref)<input className="input" placeholder="12-digit number in your bank SMS" value={f.transaction_ref} onChange={e => set('transaction_ref', e.target.value)} /></label>
+          <label className="field">When was it debited?<input className="input" placeholder="e.g. 23 Nov, 4:10 PM" value={f.debit_time} onChange={e => set('debit_time', e.target.value)} /></label>
+          <label className="field">Your bank / app<input className="input" placeholder="e.g. SBI, PhonePe" value={f.victim_bank} onChange={e => set('victim_bank', e.target.value)} /></label>
+          <label className="field">Paid to (UPI ID / account)<input className="input" placeholder="if you know it" value={f.beneficiary} onChange={e => set('beneficiary', e.target.value)} /></label>
         </motion.div>
       )}
       <label className="field">Anything else (what happened, when you noticed)<textarea className="textarea" value={f.notes} onChange={e => set('notes', e.target.value)} /></label>
@@ -72,9 +76,17 @@ export function ReportTab({ r, sender, channel }) {
       </div>
       {summary && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="kicker">Copy into the complaint form's “incident details” box · report {summary.report_id}</div>
+          {summary.trail && (summary.trail.upi_ids.length + summary.trail.accounts.length + summary.trail.phones.length + summary.trail.links.length > 0) && (
+            <div className="trail">
+              <div className="focus-k">Money trail found in the message – investigators trace these</div>
+              {summary.trail.upi_ids.length > 0 && <div>UPI ID: <b>{summary.trail.upi_ids.join(', ')}</b></div>}
+              {summary.trail.accounts.length > 0 && <div>Account: <b>{summary.trail.accounts.join(', ')}</b>{summary.trail.ifsc.length > 0 && <> · IFSC <b>{summary.trail.ifsc.join(', ')}</b></>}</div>}
+              {summary.trail.phones.length > 0 && <div>Phone: <b>{summary.trail.phones.map(([n, k]) => `${n} (${k})`).join(', ')}</b></div>}
+              {summary.trail.links.length > 0 && <div>Link: <b>{summary.trail.links.map(l => l[0]).join(', ')}</b></div>}
+            </div>
+          )}
+          <div className="kicker" style={{ marginTop: 14 }}>Copy into the complaint form's “incident details” box</div>
           <div className="codebox"><Copy text={summary.summary} />{summary.summary}</div>
-          <p className="small muted" style={{ marginTop: 6 }}>SHA-256 fingerprint of the message: <span className="mono">{summary.sha256}</span></p>
         </motion.div>
       )}
     </div>
@@ -103,10 +115,17 @@ export function IntelTab({ r, sender, onChange }) {
   const [res, setRes] = useState(null);
   const [busy, setBusy] = useState(false);
   useEffect(() => { api.intelPreview(r.text, sender).then(setQ).catch(() => {}); }, [r.text, sender]);
-  if (r.verdict === 'SAFE') return <p className="muted">Available when a message is marked SCAM or SUSPICIOUS.</p>;
+  const [open, setOpen] = useState(false);
+  if (r.verdict === 'SAFE') return null;
+  if (!open) return (
+    <div className="optional-box">
+      <div><b>Optional: is this scam in the news?</b><div className="small muted">Uses the internet once, and only sends the scam type – never your message.</div></div>
+      <button className="btn small ghost" onClick={() => setOpen(true)}>Show</button>
+    </div>
+  );
   const go = async () => { setBusy(true); try { setRes(await api.intelSearch(r.text, sender)); } catch (e) { setRes({ error: e.message }); } setBusy(false); onChange?.(); };
   return (
-    <div className="stack">
+    <div className="stack optional-box open">
       <p><b>Optional.</b> Search recent news to see whether this type of scam is being reported. This is the <b>only</b> feature that uses the internet, and only when you click the button.</p>
       <div className="night" style={{ padding: '18px 20px', borderRadius: 18 }}>
         <div className="small muted">Only these words will be sent to news.google.com:</div>
@@ -154,6 +173,7 @@ export function HoodTab({ r }) {
       </div>
       <div className="stack">
         <div><div className="kicker">Words that pushed the model (learned weights)</div>
+          <p className="small muted" style={{ marginBottom: 8 }}>Single words show what the statistical model leaned on; it reads patterns, not meaning, so small words can appear here.</p>
           <div className="row" style={{ gap: 8 }}>{r.top_words.map((w, i) => (
             <span key={i} className={`tag ${w.weight > 0 ? 'bad' : 'ok'}`}>{w.word} {w.weight > 0 ? '▲' : '▼'} {w.weight.toFixed(2)}</span>))}
             {!r.top_words.length && <span className="muted small">–</span>}

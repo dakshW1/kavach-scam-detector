@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import BlurText from '../reactbits/BlurText.jsx';
 import SpotlightCard from '../reactbits/SpotlightCard.jsx';
 import Reveal from '../components/Reveal.jsx';
 import { md } from '../components/ResultTabs.jsx';
@@ -27,7 +26,7 @@ export default function Library() {
     <div className="wrap">
       <div className="page-title">
         <div className="kicker">Works with no internet</div>
-        <h1><BlurText text="The Scam Library" delay={80} /></h1>
+        <h1>The Scam Library</h1>
         <p>How the common scams in India work, the warning signs, and what to do – from public advice by RBI, cybercrime.gov.in and Sanchar Saathi.</p>
       </div>
 

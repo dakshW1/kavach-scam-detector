@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import BlurText from '../reactbits/BlurText.jsx';
 import DecryptedText from '../reactbits/DecryptedText.jsx';
 import Magnet from '../reactbits/Magnet.jsx';
 import { HighlightedMessage } from '../components/ResultParts.jsx';
@@ -50,7 +49,7 @@ export default function Fool() {
     <div className="wrap">
       <div className="page-title">
         <div className="kicker">Robustness demo</div>
-        <h1><BlurText text="Try to fool it" delay={80} /></h1>
+        <h1>Try to fool it</h1>
         <p>Scammers disguise words so filters miss them. Disguise a scam here – or type your own – and watch Kavach still read it.</p>
       </div>
       <div className="card stack" style={{ marginTop: 20 }}>

@@ -21,7 +21,7 @@ It also shows **why**: the suspicious words are highlighted, and every link is i
 | **Evidence report** | A PDF or text report for a complaint: the original message, a SHA-256 fingerprint, evidence point by point, link analysis, where to report, and a short paragraph ready to paste into the complaint form |
 | **Scam Diary** (opt-in) | A local history with a dashboard (scam types, tricks, impersonated brands, a weekly timeline). It stores only **masked** snippets |
 | **Family alert** | A warning in English and Hindi, as text or an image card, with no personal data. The user shares it themselves |
-| **Scam Library** (offline) | 13 scam families: how each works, warning signs, protection and recovery |
+| **Scam Library** (offline) | 17 scam families: how each works, warning signs, protection and recovery |
 | **Online Scam Intel** (opt-in) | "Is this happening to others?" A news search that sends **only** the scam type and brand (shown first, sent only after the user clicks) and summarises the results locally |
 | **Try to fool it** | Disguise a scam and watch Kavach still catch it |
 | **Batch check** | Check a whole file of messages and download the results as CSV |
@@ -36,7 +36,7 @@ python -m venv .venv
 .venv\Scripts\activate            # Windows   (macOS/Linux: source .venv/bin/activate)
 pip install -r requirements.txt
 python server.py                  # the website: open http://127.0.0.1:8000
-pytest                            # 34 tests, including the privacy proof
+pytest                            # 54 tests, including the privacy proof
 ```
 
 The website is already built (`web/dist`), so Node.js is **not** needed to run it. A simpler Streamlit version of the
@@ -70,7 +70,7 @@ message ──► 1. clean text ──► 2. red-flag rules + link inspector ─
    scares, parcel traps, UPI "receive money" tricks, remote-access apps, fake family emergencies. There are also
    *reassuring* patterns, and negation is handled ("never install AnyDesk" is advice, not a demand). Each rule has a
    plain-language reason.
-   **Link inspector:** extracts links and checks them against a built-in list of official domains of 41 brands,
+   **Link inspector:** extracts links and checks them against a built-in list of official domains of 68 brands,
    banks and government sites, without opening them.
 3. **Model.** TF-IDF features on the cleaned text (word 1–2-grams plus character 2–5-grams, which survive typos and
    Hinglish spellings), plus one 0/1 column per rule. These feed a **logistic regression** for SCAM vs SAFE and a
@@ -93,22 +93,61 @@ Every number is on messages the model never saw during training (from `results/m
 
 | Test set | Messages | Accuracy | Scams caught (SCAM or SUSPICIOUS) | Genuine marked SCAM | Genuine marked SUSPICIOUS | Category accuracy |
 |---|---|---|---|---|---|---|
-| **Final test** (hand-written, written before tuning, never used to improve the model) | 72 | 97.2% | 100% (37/37) | 5.7% (2/35) | 5.7% (2/35) | 97.3% |
-| Challenge set (hand-written, used for error analysis) | 101 | 96.0% | 98.1% (52/53) | 6.2% (3/48) | 4.2% (2/48) | 84.6% |
-| Held-out templates + UCI messages (split by template) | 1,101 | 98.4% | 97.1% | 0.1% | 1.2% | 79.7% |
+| **Final test v2** (hand-written before the v2 fixes, never used to improve the model) | 68 | 98.5% | 34/35 | 0/33 | 2/33 | 97.1% |
+| Final test v1 (hand-written before the first tuning) | 72 | 97.2% | 37/37 | 1/35 | 1/35 | 91.9% |
+| Messages typed by 5 persona testers (used for error analysis) | 137 | 97.8% | 83/83 | 2/54 | 0/54 | 94.0% |
+| Challenge set (hand-written, used for error analysis) | 101 | 96.0% | 53/53 | 1/48 | 2/48 | 86.8% |
+| Held-out templates + UCI messages (split by template) | 1,423 | 97.5% | 558/571 | 1/852 | 10/852 | 96.8% |
 
-- **Languages (final test):** English 21/21, Hinglish 6/6, Hindi 5/5 and disguised 5/5 scams caught.
-- **Real bank alerts, OTPs and deliveries (final test):** none marked SCAM. 1 of 7 bank alerts was marked SUSPICIOUS.
-- **Confidence reliability:** expected calibration error 0.006, Brier score 0.016 (all test sets together). The chart
-  is in `results/reliability.png`.
-- **Disguised text:** test scams were caught 97.2% of the time as written and 99.2% after random disguise tricks.
-  Retrained without the cleaner, the model catches 95.6% of the disguised copies. The character n-grams already give
-  some robustness, and the cleaner adds the rest.
-- **Speed:** about 15–25 ms per message on a laptop CPU. The model is 1.2 MB.
+- **Real delivery OTPs, bank alerts and OTPs (final test v2):** none marked SCAM or SUSPICIOUS.
+- **Chain forwards and hoaxes:** both hoaxes in the tester set are flagged, not called SAFE.
+- **Confidence reliability:** expected calibration error 0.020, Brier score 0.015 (all test sets together). Most
+  messages are easy, so the 20–80% range holds few examples. A very short message with no clear sign is capped at 85%.
+- **Disguised text:** test scams were caught 97.5% of the time as written and 97.9% after random disguise tricks.
+  Retrained without the cleaner, the model catches 95.2% of the disguised copies.
+- **Speed and size:** about 15–25 ms per message on a laptop CPU. The model is 1.3 MB.
 
 **Read these numbers with care.** Much of the Indian training data is generated from templates. The hand-written sets
-are small (72 and 101 messages), so each message moves the percentages by 1–2 points. Real-world accuracy will
-probably be lower. The remaining mistakes are listed on the app's Results page.
+are small (68–137 messages), so each message moves the percentages by 1–3 points. Real-world accuracy will probably be
+lower. The remaining mistakes are listed on the app's "How accurate is it?" page.
+
+### What changed in v2, and why
+
+Five persona testers used v1 and typed 145 messages of their own: an elderly user, an ML judge, a cyber-crime
+police officer, a product designer and a red-team student. Their messages are labelled in `data/tester_set.py`, and
+the fixes are tested in `tests/test_tester_regressions.py`.
+
+**Before any fix, I wrote a new untouched test set (`data/final_test_v2.py`) to measure the changes fairly.**
+
+| Untouched final test v2 | v1 | v2 |
+|---|---|---|
+| Scams caught | 28/35 | 34/35 |
+| Genuine messages wrongly called SCAM | 7/33 | 0/33 |
+
+Main fixes:
+
+- **Genuine messages wrongly flagged:**
+  - Delivery and ride OTPs ("share the code with the agent at your door") were called scams. They are now a
+    reassuring sign.
+  - Dates like `23Nov26` were read as disguised text, which flagged a genuine SBI alert. They are no longer "decoded".
+  - Ordinary amounts in bank alerts triggered "Big money offer". Only money *offered* to you counts now.
+- **Scams that got through:**
+  - "Tell me the number that came on your phone" (no word "OTP") passed. Code requests are caught in any wording.
+  - Scam pages on Google Sites, Forms, Blogspot, Netlify and other free builders were trusted. They are never
+    official now, and they are dangerous when the message talks about banks, accounts or KYC.
+  - Fake government domains (`incometax-gov.in`) are now detected.
+  - New rules cover chain forwards, donation appeals, family emergencies (Ma, Appa, airport, hospital), digital
+    arrest over video call, loan-app shaming threats, and requests for bank or Aadhaar details.
+- **Wrong explanations:**
+  - "Do not tell your family" was shown as a green "do not share OTP" sign. It is now an isolation red flag.
+  - The category now follows a proven scam type, so the UI can't show "KYC/Bank" next to "Digital arrest".
+- **Training data:** a third batch of 141 templates targets the gaps (`data/templates_v3.py`). It includes many
+  genuine Hinglish and Hindi messages, because v1 had learned that "Hinglish = scam".
+- **Evidence report:**
+  - New "money trail" section: UPI IDs, account numbers, IFSC codes, Indian and foreign phone numbers, the amount,
+    the transaction reference (UTR), the debit time and the victim's bank.
+  - "Delete the message" was replaced with "keep the original for investigators".
+  - Typed-in fields can no longer forge lines in the report.
 
 ## Privacy: how to verify it is offline
 
@@ -134,8 +173,8 @@ probably be lower. The remaining mistakes are listed on the app's Results page.
 | Source | Use |
 |---|---|
 | [UCI SMS Spam Collection](https://archive.ics.uci.edu/dataset/228/sms+spam+collection) (Almeida & Hidalgo, 2011, CC BY 4.0) | 2,500 genuine personal messages as SAFE. Prize/claim spam as Lottery/Prize scams. Other UCI spam (marketing, ringtones) was left out: it is spam, not fraud |
-| `data/generate.py`: Indian messages from 235 hand-written templates (124 scam, 111 genuine) | Scams in 5 categories and genuine bank alerts, OTPs, deliveries, bills, promotions, government notices and chats, in English, Hinglish and Hindi. Based on public warnings from RBI, banks, the cyber-crime portal and news reports, with random banks, amounts, links and disguise tricks. **Synthetic.** |
-| `data/challenge.py` (101) and `data/final_test.py` (72) | Hand-written test sets with different wording. Never used for training |
+| `data/generate.py` + `data/templates_v3.py`: Indian messages from 376 hand-written templates (175 scam, 201 genuine) | Scams in 5 categories and genuine bank alerts, OTPs, deliveries, bills, promotions, government notices and chats, in English, Hinglish and Hindi. Based on public warnings from RBI, banks, the cyber-crime portal and news reports, with random banks, amounts, links and disguise tricks. **Synthetic.** |
+| `data/challenge.py` (101), `data/final_test.py` (72), `data/final_test_v2.py` (68), `data/tester_set.py` (137) | Hand-written and real-user test sets with different wording. Never used for training |
 
 The split is **by template**: messages generated from one template are either all in training or all in test.
 
@@ -173,7 +212,7 @@ results/              metrics.json, reliability.png
 - **New scam styles** may come out as SUSPICIOUS or "Other". That is intentional.
 - **Short links** can't be followed: Kavach can't see where a shortened link leads, because finding out would mean
   opening it.
-- **The official domain list is hand-made** and covers 41 organisations.
+- **The official domain list is hand-made** and covers 68 organisations plus every .gov.in / .nic.in site. Free site builders are never trusted, but a brand-new lookalike domain that names no known brand can still look "unknown".
 
 ## Credits and AI assistance
 
@@ -181,8 +220,8 @@ results/              metrics.json, reliability.png
 - Libraries: scikit-learn, FastAPI, Streamlit, pandas, matplotlib, ReportLab, uharfbuzz.
 - Website design: [Lenis](https://github.com/darkroomengineering/lenis) (smooth scrolling, MIT),
   [Vanta.js](https://github.com/tengbao/vanta) + three.js (animated 3D network in the hero, MIT),
-  [React Bits](https://github.com/DavidHDev/react-bits) by David Haz (BlurText, ShinyText, DecryptedText, CountUp,
-  SpotlightCard, StarBorder, ClickSpark, FadeContent and Magnet, copied into `web/src/reactbits/`; MIT + Commons
+  [React Bits](https://github.com/DavidHDev/react-bits) by David Haz (BlurText, ShinyText, DecryptedText,
+  SpotlightCard, StarBorder, FadeContent and Magnet, copied into `web/src/reactbits/`; MIT + Commons
   Clause, licence included), Motion and GSAP for animation, and Fontsource for the fonts (Bricolage Grotesque, Manrope,
   Instrument Serif and Noto Sans Devanagari, all bundled locally). The visual language follows my earlier projects
   Kilometre, Clausewise and Approvals.

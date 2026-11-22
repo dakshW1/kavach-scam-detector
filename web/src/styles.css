@@ -400,3 +400,30 @@ body, .card, .stat, .flag, .nav, .tabs, .input, .select, .textarea, .link-card, 
 .focus-row p { color: var(--ink-2) !important; font-size: .92rem !important; }
 @media (max-width: 900px) { .result-grid.focusing .message-card { position: static; } }
 @media (prefers-reduced-motion: reduce) { .msg mark.is-focus { animation: none; } }
+
+/* ---------------- v2 declutter */
+.hero-bg { opacity: 0.55; }
+.hero .lede { color: rgba(237, 235, 230, 0.82); }
+.legend { font-size: 0.875rem; }
+.kicker { font-size: 0.8rem; }
+.flag p, .flag q { font-size: 0.92rem; }
+.help-strip {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  margin-top: 12px; padding: 14px 18px; border-radius: 18px; background: var(--bad-soft); color: var(--ink);
+}
+.help-strip b.num { color: var(--bad); font-size: 1.1em; }
+.more-menu {
+  position: absolute; left: 0; top: calc(100% + 10px); z-index: 60; width: 270px; padding: 8px; border-radius: 18px;
+  background: var(--surface); box-shadow: var(--shadow-lift), 0 0 0 1px var(--line);
+}
+.more-menu button { all: unset; display: block; width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 12px; cursor: pointer; }
+.more-menu button:hover, .more-menu button.on { background: var(--surface-2); }
+.more-menu b { display: block; font-size: 0.92rem; color: var(--ink); }
+.more-menu small { color: var(--muted); font-size: 0.8rem; }
+.trail { margin-top: 12px; padding: 14px 16px; border-radius: 14px; background: var(--warn-soft); line-height: 1.8; font-size: 0.92rem; }
+.optional-box { margin-top: 22px; padding: 16px 18px; border-radius: 16px; background: var(--surface-2); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.optional-box.open { display: flex; flex-direction: column; align-items: stretch; }
+
+.result-grid { align-items: start; }
+
+.nav-links { overflow: visible; flex-wrap: wrap; }
