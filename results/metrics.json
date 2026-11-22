@@ -1,6 +1,6 @@
 {
   "model": {
-    "size_mb": 1.175589,
+    "size_mb": 1.175499,
     "t_safe": 0.35,
     "t_scam": 0.7,
     "n_train": 4040,
@@ -14,19 +14,19 @@
     "precision": 0.9975,
     "recall": 0.9591346153846154,
     "f1": 0.9779411764705883,
-    "caught_scam_or_suspicious": 0.9663461538461539,
+    "caught_scam_or_suspicious": 0.9711538461538461,
     "safe_marked_scam": 0.00145985401459854,
-    "safe_marked_suspicious": 0.017518248175182483,
+    "safe_marked_suspicious": 0.01167883211678832,
     "verdicts": {
       "scam": {
         "SCAM": 399,
-        "SUSPICIOUS": 3,
-        "SAFE": 14
+        "SUSPICIOUS": 5,
+        "SAFE": 12
       },
       "safe": {
         "SCAM": 1,
-        "SUSPICIOUS": 12,
-        "SAFE": 672
+        "SUSPICIOUS": 8,
+        "SAFE": 676
       }
     },
     "false_alarms_by_kind": {
@@ -46,8 +46,8 @@
         "marked_suspicious": 0.0
       }
     },
-    "category_accuracy": 0.8009950248756219,
-    "category_macro_f1": 0.769773718286159,
+    "category_accuracy": 0.7970297029702971,
+    "category_macro_f1": 0.764540567821049,
     "category_confusion": {
       "KYC/Bank": {
         "KYC/Bank": 77,
@@ -67,12 +67,12 @@
         "KYC/Bank": 2,
         "Lottery/Prize": 0,
         "Loan/Credit": 42,
-        "Job/Investment": 1,
-        "Other": 25
+        "Job/Investment": 8,
+        "Other": 18
       },
       "Job/Investment": {
         "KYC/Bank": 0,
-        "Lottery/Prize": 4,
+        "Lottery/Prize": 6,
         "Loan/Credit": 0,
         "Job/Investment": 56,
         "Other": 8
@@ -85,70 +85,63 @@
         "Other": 32
       }
     },
-    "ms_per_message": 15.87350626702972,
+    "ms_per_message": 20.936792279745525,
     "calibration": {
       "bins": [
         {
           "lo": 0.0,
           "hi": 0.2,
-          "n": 679,
-          "mean_p": 0.008128736046790281,
-          "frac_scam": 0.011782032400589101
+          "n": 677,
+          "mean_p": 0.007590634188675686,
+          "frac_scam": 0.0103397341211226
         },
         {
           "lo": 0.2,
           "hi": 0.4,
-          "n": 12,
-          "mean_p": 0.3204382746099848,
-          "frac_scam": 0.5833333333333334
+          "n": 14,
+          "mean_p": 0.3027182495776866,
+          "frac_scam": 0.5
         },
         {
           "lo": 0.4,
           "hi": 0.6000000000000001,
-          "n": 9,
-          "mean_p": 0.4624929206627917,
-          "frac_scam": 0.2222222222222222
-        },
-        {
-          "lo": 0.6000000000000001,
-          "hi": 0.8,
-          "n": 1,
-          "mean_p": 0.6354515694537769,
-          "frac_scam": 0.0
+          "n": 10,
+          "mean_p": 0.48199565991850274,
+          "frac_scam": 0.3
         },
         {
           "lo": 0.8,
           "hi": 1.0,
           "n": 400,
-          "mean_p": 0.9922796704947758,
+          "mean_p": 0.9942886052019775,
           "frac_scam": 0.9975
         }
       ],
-      "ece": 0.009556174919544207,
-      "brier": 0.013461855694129202
+      "ece": 0.007018709971455953,
+      "brier": 0.012480181293901592
     }
   },
   "challenge": {
     "n": 101,
     "n_scam": 53,
     "n_safe": 48,
-    "accuracy": 0.9504950495049505,
-    "precision": 0.9444444444444444,
-    "recall": 0.9622641509433962,
-    "f1": 0.9532710280373832,
-    "caught_scam_or_suspicious": 1.0,
+    "accuracy": 0.9603960396039604,
+    "precision": 0.9454545454545454,
+    "recall": 0.9811320754716981,
+    "f1": 0.9629629629629629,
+    "caught_scam_or_suspicious": 0.9811320754716981,
     "safe_marked_scam": 0.0625,
-    "safe_marked_suspicious": 0.020833333333333332,
+    "safe_marked_suspicious": 0.041666666666666664,
     "verdicts": {
       "scam": {
-        "SCAM": 51,
-        "SUSPICIOUS": 2,
-        "SAFE": 0
+        "SCAM": 52,
+        "SUSPICIOUS": 0,
+        "SAFE": 1
       },
       "safe": {
         "SCAM": 3,
-        "SUSPICIOUS": 1,
-        "SAFE": 44
+        "SUSPICIOUS": 2,
+        "SAFE": 43
       }
     },
     "false_alarms_by_kind": {
@@ -168,8 +161,8 @@
         "marked_suspicious": 0.0
       }
     },
-    "category_accuracy": 0.8490566037735849,
-    "category_macro_f1": 0.8522222222222222,
+    "category_accuracy": 0.8461538461538461,
+    "category_macro_f1": 0.8493650793650793,
     "category_confusion": {
       "KYC/Bank": {
         "KYC/Bank": 12,
@@ -204,13 +197,13 @@
         "Lottery/Prize": 0,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 12
+        "Other": 11
       }
     },
     "caught_by_kind": {
       "english": {
         "n": 33,
-        "caught": 1.0
+        "caught": 0.9696969696969697
       },
       "hinglish": {
         "n": 9,
@@ -225,47 +218,40 @@
         "caught": 1.0
       }
     },
-    "ms_per_message": 18.35908514851218,
+    "ms_per_message": 17.51646237624138,
     "calibration": {
       "bins": [
         {
           "lo": 0.0,
           "hi": 0.2,
-          "n": 41,
-          "mean_p": 0.027892323891629826,
+          "n": 42,
+          "mean_p": 0.030273115370156884,
           "frac_scam": 0.0
         },
         {
           "lo": 0.2,
           "hi": 0.4,
           "n": 3,
-          "mean_p": 0.29479374467548436,
-          "frac_scam": 0.0
-        },
-        {
-          "lo": 0.4,
-          "hi": 0.6000000000000001,
-          "n": 1,
-          "mean_p": 0.4060112313131707,
-          "frac_scam": 1.0
+          "mean_p": 0.3548515559182004,
+          "frac_scam": 0.3333333333333333
         },
         {
           "lo": 0.6000000000000001,
           "hi": 0.8,
-          "n": 4,
-          "mean_p": 0.7123418020328098,
-          "frac_scam": 0.75
+          "n": 3,
+          "mean_p": 0.6944892497052857,
+          "frac_scam": 0.6666666666666666
         },
         {
           "lo": 0.8,
           "hi": 1.0,
-          "n": 52,
-          "mean_p": 0.9869035988616588,
-          "frac_scam": 0.9423076923076923
+          "n": 53,
+          "mean_p": 0.9870263195546236,
+          "frac_scam": 0.9433962264150944
         }
       ],
-      "ece": 0.05041163579153588,
-      "brier": 0.03798681493365912
+      "ece": 0.03694938810705048,
+      "brier": 0.03928497563726987
     },
     "mistakes": [
       {
@@ -288,8 +274,8 @@
         "text": "Pre-sanctioned HDFC personal loan up to 10 lakh at 0.5% interest. Confirm by sharing OTP received now.",
         "label": "SCAM",
         "category": "Loan/Credit",
-        "verdict": "SUSPICIOUS",
-        "p_scam": 0.681,
+        "verdict": "SCAM",
+        "p_scam": 0.714,
         "pred_category": "Other"
       },
       {
@@ -305,16 +291,16 @@
         "label": "SCAM",
         "category": "Job/Investment",
         "verdict": "SCAM",
-        "p_scam": 0.999,
+        "p_scam": 1.0,
         "pred_category": "Loan/Credit"
       },
       {
         "text": "FedEx: a parcel booked in your name to Taiwan has 5 passports and drugs. Call Mumbai Narcotics on Skype now.",
         "label": "SCAM",
         "category": "Other",
-        "verdict": "SUSPICIOUS",
-        "p_scam": 0.406,
-        "pred_category": "Other"
+        "verdict": "SAFE",
+        "p_scam": 0.346,
+        "pred_category": null
       },
       {
         "text": "Your WhatsApp account will be deleted. To keep it, send the 6-digit code you received by SMS.",
@@ -329,7 +315,7 @@
         "label": "SCAM",
         "category": "Other",
         "verdict": "SCAM",
-        "p_scam": 0.996,
+        "p_scam": 0.997,
         "pred_category": "KYC/Bank"
       },
       {
@@ -337,7 +323,7 @@
         "label": "SCAM",
         "category": "Other",
         "verdict": "SCAM",
-        "p_scam": 0.994,
+        "p_scam": 0.996,
         "pred_category": "KYC/Bank"
       },
       {
@@ -345,7 +331,7 @@
         "label": "SAFE",
         "category": "",
         "verdict": "SUSPICIOUS",
-        "p_scam": 0.675,
+        "p_scam": 0.645,
         "pred_category": "Other"
       },
       {
@@ -353,7 +339,7 @@
         "label": "SAFE",
         "category": "",
         "verdict": "SCAM",
-        "p_scam": 0.818,
+        "p_scam": 0.846,
         "pred_category": "Lottery/Prize"
       },
       {
@@ -365,11 +351,19 @@
         "pred_category": "Other"
       },
       {
+        "text": "Urgent: meeting moved to 4 PM, bring the laptop and the project report.",
+        "label": "SAFE",
+        "category": "",
+        "verdict": "SUSPICIOUS",
+        "p_scam": 0.372,
+        "pred_category": "Lottery/Prize"
+      },
+      {
         "text": "Papa ka account block ho gaya tha, branch jaake KYC karwa liya, ab sab theek hai",
         "label": "SAFE",
         "category": "",
         "verdict": "SCAM",
-        "p_scam": 0.859,
+        "p_scam": 0.908,
         "pred_category": "KYC/Bank"
       }
     ]
@@ -378,17 +372,17 @@
     "n": 72,
     "n_scam": 37,
     "n_safe": 35,
-    "accuracy": 0.9583333333333334,
-    "precision": 0.9473684210526315,
-    "recall": 0.972972972972973,
-    "f1": 0.9599999999999999,
+    "accuracy": 0.9722222222222222,
+    "precision": 0.9487179487179487,
+    "recall": 1.0,
+    "f1": 0.9736842105263158,
     "caught_scam_or_suspicious": 1.0,
     "safe_marked_scam": 0.05714285714285714,
     "safe_marked_suspicious": 0.05714285714285714,
     "verdicts": {
       "scam": {
-        "SCAM": 36,
-        "SUSPICIOUS": 1,
+        "SCAM": 37,
+        "SUSPICIOUS": 0,
         "SAFE": 0
       },
       "safe": {
@@ -471,40 +465,40 @@
         "caught": 1.0
       }
     },
-    "ms_per_message": 18.9189166666842,
+    "ms_per_message": 15.497819444463959,
     "calibration": {
       "bins": [
         {
           "lo": 0.0,
           "hi": 0.2,
           "n": 30,
-          "mean_p": 0.012661642406986369,
+          "mean_p": 0.013120014888463283,
           "frac_scam": 0.0
         },
         {
           "lo": 0.2,
           "hi": 0.4,
           "n": 1,
-          "mean_p": 0.3113146284472163,
+          "mean_p": 0.3190784435711211,
           "frac_scam": 0.0
         },
         {
           "lo": 0.4,
           "hi": 0.6000000000000001,
-          "n": 3,
-          "mean_p": 0.5030886345383085,
-          "frac_scam": 0.3333333333333333
+          "n": 2,
+          "mean_p": 0.45783878165447633,
+          "frac_scam": 0.0
         },
         {
           "lo": 0.8,
           "hi": 1.0,
-          "n": 38,
-          "mean_p": 0.9899225941391874,
-          "frac_scam": 0.9473684210526315
+          "n": 39,
+          "mean_p": 0.9894060550362056,
+          "frac_scam": 0.9487179487179487
         }
       ],
-      "ece": 0.0391317830772341,
-      "brier": 0.030299854552768932
+      "ece": 0.04465545277702766,
+      "brier": 0.029391019342587428
     },
     "mistakes": [
       {
@@ -512,23 +506,15 @@
         "label": "SCAM",
         "category": "Loan/Credit",
         "verdict": "SCAM",
-        "p_scam": 0.957,
+        "p_scam": 0.959,
         "pred_category": "Other"
-      },
-      {
-        "text": "Bhai ek app hai jisme paisa 20 din me double hota hai, maine bhi lagaya, tu bhi 5000 daal de",
-        "label": "SCAM",
-        "category": "Job/Investment",
-        "verdict": "SUSPICIOUS",
-        "p_scam": 0.568,
-        "pred_category": "Job/Investment"
       },
       {
         "text": "Dear customer, your ATM PIN was changed successfully on 20-11-26. If not done by you, call 1800 1080 immediately. -SBI",
         "label": "SAFE",
         "category": "",
         "verdict": "SUSPICIOUS",
-        "p_scam": 0.44,
+        "p_scam": 0.434,
         "pred_category": "KYC/Bank"
       },
       {
@@ -536,7 +522,7 @@
         "label": "SAFE",
         "category": "",
         "verdict": "SUSPICIOUS",
-        "p_scam": 0.501,
+        "p_scam": 0.481,
         "pred_category": "Lottery/Prize"
       },
       {
@@ -544,7 +530,7 @@
         "label": "SAFE",
         "category": "",
         "verdict": "SCAM",
-        "p_scam": 0.882,
+        "p_scam": 0.917,
         "pred_category": "Other"
       },
       {
@@ -552,7 +538,7 @@
         "label": "SAFE",
         "category": "",
         "verdict": "SCAM",
-        "p_scam": 0.809,
+        "p_scam": 0.847,
         "pred_category": "Lottery/Prize"
       }
     ]
@@ -562,45 +548,45 @@
       {
         "lo": 0.0,
         "hi": 0.2,
-        "n": 750,
-        "mean_p": 0.009390461770049352,
-        "frac_scam": 0.010666666666666666
+        "n": 749,
+        "mean_p": 0.009084019543302974,
+        "frac_scam": 0.009345794392523364
       },
       {
         "lo": 0.2,
         "hi": 0.4,
-        "n": 16,
-        "mean_p": 0.31505969736209294,
-        "frac_scam": 0.4375
+        "n": 18,
+        "mean_p": 0.3123160336340741,
+        "frac_scam": 0.4444444444444444
       },
       {
         "lo": 0.4,
         "hi": 0.6000000000000001,
-        "n": 13,
-        "mean_p": 0.4675164169917863,
-        "frac_scam": 0.3076923076923077
+        "n": 12,
+        "mean_p": 0.47796951354116496,
+        "frac_scam": 0.25
       },
       {
         "lo": 0.6000000000000001,
         "hi": 0.8,
-        "n": 5,
-        "mean_p": 0.6969637555170033,
-        "frac_scam": 0.6
+        "n": 3,
+        "mean_p": 0.6944892497052857,
+        "frac_scam": 0.6666666666666666
       },
       {
         "lo": 0.8,
         "hi": 1.0,
-        "n": 490,
-        "mean_p": 0.9915263549306239,
-        "frac_scam": 0.9877551020408163
+        "n": 492,
+        "mean_p": 0.9931192543975571,
+        "frac_scam": 0.9878048780487805
       }
     ],
-    "ece": 0.005750898453024702,
-    "brier": 0.01635774015332432
+    "ece": 0.006285836602716387,
+    "brier": 0.015560922713199535
   },
   "robustness": {
     "n": 362,
-    "caught_original": 0.9668508287292817,
+    "caught_original": 0.9723756906077348,
     "caught_disguised": 0.9917127071823204,
     "examples": [
       "Dear SBI user, your KYC is pending. Acc0unt will be D.E.A.C.T.I.V.A.T.E.D.D.D tonight. C A L L our KYC officer on +919829310270.",
@@ -610,8 +596,8 @@
       "Dear Axis Bank user, your KYC is pending. Acc0unt will be d3@ctiv@ted t0n1ght. Call our KYC officer on 65171 82754."
     ],
     "without_cleaner": {
-      "caught_original": 0.9502762430939227,
-      "caught_disguised": 0.9475138121546961
+      "caught_original": 0.9530386740331491,
+      "caught_disguised": 0.9558011049723757
     }
   }
 }

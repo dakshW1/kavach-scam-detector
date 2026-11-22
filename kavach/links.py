@@ -152,6 +152,9 @@ OFFICIAL_INDEX = _official_domains()
 def brands_in(text: str) -> list[str]:
     """Brands mentioned in a (cleaned, lowercase) text."""
     t = f" {text.lower()} "
+    # "WhatsApp 98765..." / "on WhatsApp" / "WhatsApp karein" is how to contact the scammer, not impersonation
+    t = re.sub(r"(on |par |pe )?whats ?app( (karein|karo|kare|me|pe|par|group|chat|number|no\.?))?(?=\s*[:\-]?\s*(\+?\d|wa\.me|$|[.,!]))", " ", t)
+    t = re.sub(r"\b(on|via|par|pe) whats ?app\b|\bwhats ?app (karein|karo|kare|me|pe|par|our|the|hr|manager)\b", " ", t)
     found = []
     for brand, words in BRAND_WORDS.items():
         for w in words:
