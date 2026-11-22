@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.venv/
+local_data/
+.pytest_cache/
+data/raw/sms.zip
