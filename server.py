@@ -48,6 +48,9 @@ class ReportIn(Msg):
     lost_money: bool = False
     amount_lost: str = ""
     transaction_ref: str = ""
+    debit_time: str = ""
+    victim_bank: str = ""
+    beneficiary: str = ""
     notes: str = Field("", max_length=2000)
     format: str = "pdf"
 
@@ -98,10 +101,12 @@ def api_analyze(m: Msg):
 def api_report(r: ReportIn):
     res = analyze(r.text, r.sender)
     det = report.ReportDetails(sender=r.sender, received=r.received, channel=r.channel, lost_money=r.lost_money,
-                               amount_lost=r.amount_lost, transaction_ref=r.transaction_ref, notes=r.notes)
+                               amount_lost=r.amount_lost, transaction_ref=r.transaction_ref, debit_time=r.debit_time,
+                               victim_bank=r.victim_bank, beneficiary=r.beneficiary, notes=r.notes)
     rep = report.build(res, det)
     if r.format == "summary":
-        return {"summary": report.complaint_summary(rep), "report_id": rep["report_id"], "sha256": rep["sha256"]}
+        return {"summary": report.complaint_summary(rep), "report_id": rep["report_id"], "sha256": rep["sha256"],
+                "trail": rep["trail"], "family": rep["family"]}
     if r.format == "txt":
         return Response(report.text_report(rep), media_type="text/plain; charset=utf-8",
                         headers={"Content-Disposition": f'attachment; filename="{report.filename(rep, "txt")}"'})
