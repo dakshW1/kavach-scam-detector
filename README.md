@@ -8,8 +8,6 @@ Paste an SMS or WhatsApp message and Kavach tells you, **on your own laptop and 
 
 It also shows **why**: the suspicious words are highlighted, and every link is inspected without being opened.
 
-Built for the Tinyverse Hackathon, problem statement PS-01 (On-Device Scam Message Detector).
-
 ## Features
 
 | Feature | What the user gets |

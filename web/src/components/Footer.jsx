@@ -13,7 +13,7 @@ export default function Footer({ go }) {
         </div>
         <div className="stack" style={{ gap: 8, alignItems: 'flex-end' }}>
           <button className="btn ghost" onClick={() => go('check')}>Check a message</button>
-          <span className="small muted">Runs offline · Tinyverse Hackathon PS-01</span>
+          <span className="small muted">Runs offline · nothing leaves this laptop</span>
         </div>
       </div>
     </footer>
