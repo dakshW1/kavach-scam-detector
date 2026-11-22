@@ -1,0 +1,69 @@
+label,category,kind,text
+SCAM,KYC/Bank,freehost,"SBI Rewards: 6,200 points lapse tonight. Convert to cash here https://sites.google.com/view/sbi-points-cash"
+SCAM,KYC/Bank,freehost,Your ICICI netbanking will be paused. Re-confirm your details on this form: https://forms.gle/Xy7pQ2kL
+SCAM,KYC/Bank,freehost,Axis Bank: complete your account re-validation at https://axis-revalidate.blogspot.com today.
+SCAM,Other,freehost,Electricity board notice: pay pending dues at https://bescom-dues.web.app before 9 PM to keep supply.
+SCAM,Other,freehost,Apply for PM free solar panel scheme. Limited slots. Register: https://pm-solar-yojana.netlify.app
+SCAM,KYC/Bank,code,"Ma'am, I'm from your bank's card department. Please tell me the 6-digit number you just got by SMS to stop the fraud transaction."
+SCAM,Other,code,"Bhaiya maine galti se aapke number pe code bhej diya, wo 6 digit wala number bata do please"
+SCAM,Other,code,"Hi, I entered your number by mistake for my login. Can you forward me the code you received just now?"
+SCAM,KYC/Bank,code,To complete your card upgrade our executive needs the number that came on your mobile. Kindly read it out when he calls.
+SCAM,Other,donation,Flood relief appeal: families in Assam need food. Donate generously to UPI floodhelp.assam@ybl. Every rupee counts. Forward to all.
+SCAM,Other,donation,Jai Shri Ram. Contribute Rs 1100 for Ram Navami bhandara. Send to 9876512340@paytm and share with 11 groups for blessings.
+SCAM,Other,donation,Indian Army welfare fund: soldiers' families need your help. Transfer any amount to A/c 30129876543 IFSC SBIN0001234.
+SCAM,Other,family,"Appa it's me, my phone got stolen at the station. Using my friend's mobile. Need 6000 urgently for the ticket, send to this UPI."
+SCAM,Other,family,"Hi aunty, Neha here, new number. Stuck in hospital, can you transfer 10,000 now? Don't tell anyone at home please."
+SCAM,Other,family,"Maa mera phone kharab ho gaya, ye dost ka number hai. Turant 5000 bhej do, baad me sab bataunga"
+SCAM,Other,authority,Delhi Crime Branch: a SIM in your name is used for money laundering. Stay on this WhatsApp video call. Do not inform anyone or you will be arrested.
+SCAM,Other,authority,"Narcotics Control Bureau notice: drugs found in a courier with your Aadhaar. Pay security deposit of Rs 95,000 to avoid arrest."
+SCAM,Other,authority,TRAI: your number will be disconnected in 2 hours for misuse. Press 9 to speak with our legal officer.
+SCAM,KYC/Bank,govlookalike,UIDAI: your Aadhaar biometric lock expires today. Renew at https://uidai-gov.in/renew to avoid deactivation.
+SCAM,Other,govlookalike,"Income tax refund of Rs 18,250 is ready. Verify bank details at https://incometax-gov-refund.in"
+SCAM,Other,govlookalike,"Parivahan: unpaid challan Rs 1,000 on your vehicle. Pay today at https://parivahan-gov.co.in/challan"
+SCAM,KYC/Bank,pension,"Dear pensioner, your Jeevan Pramaan is not updated. Pension will stop from next month. Update bank details at http://jeevan-pramaan-update.in"
+SCAM,KYC/Bank,pension,Treasury office se bol rahe hain. Pension renewal ke liye apna bank account number aur OTP is number par bhejiye 9123498765
+SCAM,Other,remote,"Amazon support: your refund of Rs 2,999 is stuck. Install the QuickSupport app and share the code with our agent."
+SCAM,Job/Investment,job,"Hello, we got your number from a job portal. Rate hotels on Google and earn Rs 300 per task, paid daily on Telegram."
+SCAM,Job/Investment,invest,"Join our premium stock group, guaranteed 5% daily profit. Our SEBI-registered expert will guide you. Download app via link."
+SCAM,Lottery/Prize,prize,"Dear customer, you have won a Samsung TV in the Diwali lucky draw. Pay Rs 1,499 GST to receive delivery."
+SCAM,Loan/Credit,loan,Instant loan Rs 2 lakh without salary slip. Only Aadhaar and PAN. Processing fee Rs 799. Apply via WhatsApp.
+SCAM,KYC/Bank,kyc,Aapka HDFC account aaj raat band ho jayega. KYC update ke liye is link par click karein hdfc-kyc-verify.in
+SCAM,Other,parcel,DTDC: your shipment is on hold due to address mismatch. Pay Rs 30 redelivery charge at dtdc-redeliver.top
+SCAM,Other,upi,"I accidentally sent you Rs 3,000 on PhonePe. Please approve the request I sent so it comes back to me."
+SCAM,KYC/Bank,hindi,आपका एसबीआई खाता निलंबित कर दिया गया है। अपना ओटीपी हमें भेजें ताकि खाता चालू हो सके।
+SCAM,Lottery/Prize,hindi,बधाई हो! आपका नंबर लकी ड्रॉ में चुना गया है। ₹10 लाख का इनाम पाने के लिए ₹2000 फीस भेजें।
+SCAM,KYC/Bank,disguised,Y0ur K.Y.C is p3nding. Upd@te n0w at hdfc-kyc.xyz or acc0unt will be bl0cked
+SCAM,Other,short,Your electricity will be cut tonight. Call 9876543201 now.
+SAFE,,delivery,Zomato: your order is on the way. Share OTP 3381 with the delivery partner only after you receive the food.
+SAFE,,delivery,Flipkart: your order arrives today. Please share the delivery code 5520 with the Ekart agent at your door.
+SAFE,,delivery,BigBasket: Ravi is delivering your order. Share OTP 9921 at the time of delivery. Do not share it on call.
+SAFE,,delivery,Blinkit: your order is 5 minutes away. Delivery OTP: 7164. Share it only with the delivery partner.
+SAFE,,ride,Your Uber ride OTP is 4417. Share it with your driver Suresh (KA01AB1234) to start the trip.
+SAFE,,ride,Rapido: Captain Manju is arriving in 3 mins. Ride PIN 2290. Share PIN only after boarding.
+SAFE,,bank_alert,Dear UPI user A/C X4521 debited by 250.0 on date 21Dec26 trf to RAPIDO Refno 512398761234. If not u? call 1800111109. -SBI
+SAFE,,bank_alert,"Dear SBI User, your A/c X8890-credited by Rs.5000 on 02Jan27 transfer from MOHAN R Ref No 512312341234 -SBI"
+SAFE,,bank_alert,"INR 3,450.00 spent on ICICI Bank Card XX1234 on 23-Nov-26 at RELIANCE SMART. Avl Lmt: INR 82,000. Not you? Call 18002662."
+SAFE,,bank_alert,"Your HDFC Bank Credit Card statement: total amount due Rs 15,240, minimum due Rs 760, due by 08-Dec. Pay via NetBanking or app."
+SAFE,,bank_alert,"आपके खाते XX7781 से ₹1,200 UPI द्वारा डेबिट किए गए। यदि आपने नहीं किया तो 1800 1234 पर कॉल करें। -पीएनबी"
+SAFE,,otp,Your Instagram security code is 552 019. Don't share it with anyone.
+SAFE,,otp,OTP for your SBI YONO login is 739201. Do not disclose it to anyone. SBI never asks for OTP.
+SAFE,,awareness,"Alert from HDFC Bank: fraudsters are posing as bank staff and asking for OTP. We never ask for OTP, PIN or card details. Report at 1930."
+SAFE,,awareness,BESCOM never sends SMS asking you to call a mobile number to avoid disconnection. Such messages are fraud. Pay only on bescom.co.in.
+SAFE,,awareness,Cyber Dost: digital arrest is a scam. Police never hold people on video call or ask for money. Hang up and call 1930.
+SAFE,,awareness,"Dear customer, KYC can be updated at any branch or in the app. Do not click links in SMS claiming to update KYC. -Canara Bank"
+SAFE,,promo,Congratulations! You've won 50 SuperCoins on your last order. Use them on your next Flipkart purchase.
+SAFE,,promo,You won a scratch card! Rs 15 cashback has been added to your Google Pay rewards.
+SAFE,,promo,Lucky you! Get flat 40% off on your next Swiggy order with code FEAST40. Valid till Sunday.
+SAFE,,prize_news,Congrats to all winners of the inter-school quiz! Prizes will be distributed at the assembly on Monday.
+SAFE,,prize_news,Congratulations! You have won the Best Paper award at the student conference. Certificate will be emailed.
+SAFE,,service,"Planned power shutdown on 26 Nov, 10 AM-3 PM in HSR Layout for maintenance. Inconvenience regretted. -BESCOM"
+SAFE,,service,Your FASTag has been recharged with Rs 500. Available balance Rs 640. -Paytm Payments
+SAFE,,service,Your Aadhaar update request has been completed. Download e-Aadhaar from myaadhaar.uidai.gov.in.
+SAFE,,personal,Didi kal ghar aa rahi ho na? Mummy ne kheer banayi hai
+SAFE,,personal,"Bhai bill split kar dete hai, mera share 450 hai, abhi bhej deta hu"
+SAFE,,personal,"Ma main pahunch gaya, phone ki battery khatam ho rahi hai, kal baat karta hu"
+SAFE,,personal,"Mera account ka password bhool gaya, bank jaake reset karwaya, ab sab theek hai"
+SAFE,,personal,"Papa ne bola hai 2000 bhej diye hai aapke account me, check kar lena"
+SAFE,,personal,Can you share the Google Form link for the event registration? Need it by tonight.
+SAFE,,personal,Here's the shared folder for the trip photos: https://drive.google.com/drive/folders/abc123
+SAFE,,personal,"मैं ऑफिस से निकल गया हूँ, आधे घंटे में घर पहुँचूँगा।"

@@ -6,6 +6,8 @@ Everything is stored in this file, so it works with no internet.
 """
 from __future__ import annotations
 
+import re
+
 RECOVERY_COMMON = [
     "Call **1930** (National Cyber Crime Helpline) immediately. The first hours (the 'golden hour') matter most: the faster you report, the better the chance the money can be frozen before it is moved.",
     "Call your bank on the number printed on your card or passbook (not a number from the message) and block your card, UPI and net banking.",
@@ -31,7 +33,7 @@ FAMILIES: dict[str, dict] = {
         "signs": ["Threat that the account will be blocked today", "Link that is not the bank's official website",
                   "Asks for OTP, PIN, CVV or password", "Personal 10-digit mobile number as 'customer care'"],
         "protect": ["Banks never ask for KYC through SMS links. Do KYC only at the branch or in the official app.",
-                    "Check the link: SBI is sbi.co.in / onlinesbi.sbi, not sbi-kyc-update.xyz.",
+                    "Check the END of the link: a bank's real website ends with its official domain (for example sbi.co.in or hdfcbank.com), never a lookalike.",
                     "Never share OTP, PIN, CVV or passwords with anyone, even 'bank staff'."],
     },
     "sim_kyc": {
@@ -126,7 +128,7 @@ FAMILIES: dict[str, dict] = {
         "protect": ["You NEVER need your UPI PIN or a QR scan to receive money.", "Decline unknown collect requests."],
     },
     "family_emergency": {
-        "title": "Fake family emergency ('Hi Mum, new number')", "category": "Other", "icon": "👨‍👩‍👧",
+        "title": "Fake family emergency ('Hi Ma, new number')", "category": "Other", "icon": "👨‍👩‍👧",
         "how": ["A message from an unknown number claims to be your child, parent or friend whose phone broke.",
                 "They urgently need money for fees, a hospital or an accident.",
                 "The money goes to the scammer's UPI."],
@@ -141,6 +143,43 @@ FAMILIES: dict[str, dict] = {
                 "The scammer takes over the account and asks your contacts for money."],
         "signs": ["Send me the code you just received", "Account will be deleted"],
         "protect": ["Never share any code you receive by SMS.", "Turn on two-step verification in WhatsApp."],
+    },
+    "pension_ppo": {
+        "title": "Pension / PPO / life-certificate scam", "category": "KYC/Bank", "icon": "👵",
+        "how": ["A message or call claims to be from the treasury, a bank or the pension office: 'PPO not linked', 'life certificate pending', 'pension will stop'.",
+                "You are sent a link or asked for Aadhaar, bank details and the OTP to 'verify'.",
+                "The OTP is used to take money from the pension account."],
+        "signs": ["Pension will stop / PPO not linked", "Link or mobile number for Jeevan Pramaan", "Asks for Aadhaar, bank details or OTP"],
+        "protect": ["Submit the life certificate only at the bank, post office, a CSC centre or the official Jeevan Pramaan app (jeevanpramaan.gov.in).",
+                    "Pension offices never ask for OTP or bank details over the phone."],
+    },
+    "donation": {
+        "title": "Fake donation / relief appeal", "category": "Other", "icon": "🙏",
+        "how": ["A message asks for money for a temple, a festival, flood relief or soldiers' families, with an emotional story.",
+                "The money goes to a personal UPI ID or account that has nothing to do with the cause.",
+                "It often says 'share with 10 groups' so it spreads fast."],
+        "signs": ["Donation to a personal UPI ID or mobile number", "Share or forward for blessings / luck", "No official website or receipt"],
+        "protect": ["Donate only through the temple's or charity's official website, counter or registered trust account.",
+                    "Ask for a receipt with the registration number (80G for tax-exempt charities).",
+                    "Do not forward appeals you have not verified."],
+    },
+    "hoax_forward": {
+        "title": "Chain forward / hoax", "category": "Other", "icon": "🔁",
+        "how": ["A forwarded message claims something alarming or miraculous: 'WhatsApp will charge', 'this cures cancer', 'forward or face bad luck'.",
+                "It asks you to forward it to many people, so it spreads before anyone checks it.",
+                "Some versions carry scam links or collect phone numbers."],
+        "signs": ["Forward to 10 / 20 / all contacts", "Good luck or bad luck if you (don't) share", "'Doctors / companies are hiding this'"],
+        "protect": ["Do not forward it. Check the claim on the official website or a fact-check site.",
+                    "Companies announce changes on their official site, not through forwards."],
+    },
+    "remote_access": {
+        "title": "Fake customer care / screen-sharing app", "category": "Other", "icon": "🖥️",
+        "how": ["You search for a customer-care number or get a call about a refund or problem.",
+                "The 'agent' asks you to install AnyDesk, TeamViewer, QuickSupport or an .apk file and share its code.",
+                "With control of your phone they open your bank app and move money."],
+        "signs": ["Install an app to receive a refund", "Share the code shown in an app", "Customer care on a mobile number"],
+        "protect": ["Never install screen-sharing apps on a stranger's request.",
+                    "Find customer-care numbers only inside the official app or website."],
     },
     "unknown": {
         "title": "Other / new type of scam", "category": "Other", "icon": "❓",
@@ -157,9 +196,10 @@ CATEGORY_DEFAULT = {"KYC/Bank": "kyc_bank", "Lottery/Prize": "lottery", "Loan/Cr
 
 # rule id -> family it most strongly suggests (checked in this order)
 RULE_FAMILY = [
-    ("authority", "digital_arrest"), ("collect_request", "upi_collect"), ("family_emergency", "family_emergency"),
+    ("authority", "digital_arrest"), ("remote_app", "remote_access"), ("collect_request", "upi_collect"),
+    ("family_emergency", "family_emergency"), ("donation_request", "donation"), ("chain_forward", "hoax_forward"),
     ("disconnection", "electricity"), ("parcel", "parcel_customs"), ("refund", "refund"),
-    ("invest_bait", "investment"), ("job_bait", "task_job"), ("loan_bait", "loan_app"), ("prize", "lottery"),
+    ("invest_bait", "investment"), ("job_bait", "task_job"), ("loan_bait", "loan_app"), ("shame_threat", "loan_app"), ("prize", "lottery"),
     ("kyc", "kyc_bank"),
 ]
 
@@ -168,10 +208,13 @@ def family_for(category: str, rule_ids: set[str], text: str) -> str:
     t = text.lower()
     if category == "KYC/Bank" and ("sim" in t or "trai" in t) and "bank" not in t:
         return "sim_kyc"
-    if ("code" in t or "otp" in t) and "whatsapp" in t:
+    if re.search(r"\b(pension|pensioner|ppo|jeevan pramaan|life certificate|treasury)\b", t):
+        return "pension_ppo"
+    if ("code" in t or "otp" in t) and ("whatsapp" in t or "instagram" in t or "by mistake" in t or "accidentally" in t):
         return "account_takeover"
     for rule, fam in RULE_FAMILY:
-        if rule in rule_ids and (FAMILIES[fam]["category"] == category or category == "Other"):
+        if rule in rule_ids and (FAMILIES[fam]["category"] == category or category == "Other"
+                                 or fam in ("digital_arrest", "remote_access", "family_emergency", "donation", "upi_collect")):
             return fam
     return CATEGORY_DEFAULT.get(category, "unknown")
 

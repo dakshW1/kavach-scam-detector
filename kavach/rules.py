@@ -32,9 +32,15 @@ class Flag:
 
 
 # (id, label, severity, reason, regex on cleaned lowercase text)
-SECRET = r"(otp|one time password|pin|upi pin|mpin|cvv|password|passcode|atm pin|card number|card details|net ?banking (id|password)|verification code|6[- ]digit code|six digit code|security code|code)"
-SHARE = r"(share|send|tell|give|provide|forward|reply with|batao|bata ?do|bhejo|bhej ?do|de ?do|enter|type)"
-NEG_SHARE = r"(do ?n[o']?t|never|don'?t|not to|mat|na ?kare|nahi|na)\s+(\w+\s+){0,3}" + SHARE + r"|" + SHARE + r"\s+(\w+\s+){0,4}(mat|na ?kare|nahi ?kare)"
+SECRET = (r"(otp|one time password|pin|upi pin|mpin|cvv|password|passcode|atm pin|card number|card details|net ?banking (id|password)"
+          r"|verification (code|number)|(\d|four|six|4|6)[- ]?digits?( (code|number|otp))?|the digits|security code|code|wo number)")
+SHARE = r"(share|sharing|send|sending|tell|telling|give|giving|provide|forward|forwarding|reply with|read out|read|batao|bata ?do|bataiye|bhejo|bhej ?do|bhejiye|de ?do|enter|type)"
+# genuine OTP messages: "do not share / never disclose ... OTP" (only verbs about handing a code over, not "do not tell family")
+NEG_SHARE = (r"(do ?n[o']?t|never|don'?t|not to|mat|na ?kare|nahi|na)\s+(\w+\s+){0,3}(share|disclose|reveal|give|forward|provide)"
+             r"|(share|disclose|reveal)\s+(\w+\s+){0,4}(mat|na ?kare|nahi ?kare)")
+# "the code / number that came on your phone", "the code we just sent you", "the 6 digits you got"
+CODE_RECEIVED = (r"(code|otp|number|digits|pin)\s+(\S+\s+){0,3}(that |which |jo )?(came|you (just )?(got|received|get)|u (got|received)"
+                 r"|(we|i) (just )?sent|aaya|aya|aayega|received (just now|now|on))")
 
 RULES: list[tuple[str, str, str, str, str]] = [
     ("asks_secret", "Asks for secret code", "high",
@@ -43,21 +49,23 @@ RULES: list[tuple[str, str, str, str, str]] = [
      + r"|" + SECRET + r"\s+(\S+\s+){0,4}(share karo|batao|bataiye|bhejo|bhejiye|bhejein|bata do|send karo|share kare|read (it )?out|share with (our|the) (executive|agent|officer)|to (our|the) (executive|agent|officer))"
      + r"|(read|tell|forward|send|share|give)\s+(\S+\s+){0,3}(code|otp|pin)\s+(\S+\s+){0,2}(you|u)\s+(just\s+)?(received|got|get|receive)"
      + r"|(code|otp)\s+(\S+\s+){0,3}(sent|went)\s+(\S+\s+){0,3}(by mistake|accidentally|galti se)|accidentally sent (my|the|a) (\S+\s+){0,2}code"
-     + r"|reply with the code|(ओटीपी|पिन|पासवर्ड|सीवीवी)(\s+\S+){0,4}\s+(भेज|बता|शेयर कर)|(हमें|हमे)(\s+\S+){0,3}\s+(ओटीपी|कोड)"),
+     + r"|reply with the code|(ओटीपी|पिन|पासवर्ड|सीवीवी)(\s+\S+){0,4}\s+(भेज|बता|शेयर कर)|(हमें|हमे)(\s+\S+){0,3}\s+(ओटीपी|कोड)"
+     + r"|" + SHARE + r"\s+(\S+\s+){0,5}" + CODE_RECEIVED),
     ("kyc", "KYC by message", "high",
      "It asks you to update or complete KYC through a message link or call. Banks never ask for KYC by SMS or WhatsApp links.",
      r"\b(kyc|re-?kyc|e-?kyc|pan ?card|pan|aadhaa?r)\b(\s+\S+){0,4}\s+(update|expir\w*|pending|incomplete|suspend\w*|block\w*|verify|verification|link|karo|kare|nahi|not updated|missing)"
      + r"|\b(update|complete|verify|re-?verify)\s+(your\s+)?(kyc|pan|aadhaa?r)|\bkyc (team|centre|center|officer|helper|update|verification)|केवाईसी|kyc ke liye"),
-    ("threat", "Threatens your account", "high",
-     "It threatens that your account, card, SIM or connection will be blocked or cut off. Scammers use fear to rush you.",
-     r"\b(account|a/c|acct|card|sim|number|connection|wallet|yono|net ?banking|services?|bijli|electricity|power|balance|access)\b(\s+\S+){0,5}\s+(will be |is |has been |hoga |ho jayega |ho jaega |will |)?(block\w*|suspend\w*|deactivat\w*|clos\w*|disconnect\w*|disabled|band|kat jayega|cut|terminat\w*|freez\w*|frozen|on hold|hold par|barred|lock\w*|restricted|blacklisted|stop working|be lost|deleted)"
+    ("threat", "Threatens to block or cut off", "high",
+     "It threatens that your account, card, SIM, pension or connection will be blocked or cut off. Scammers use fear to rush you.",
+     r"\b(account|a/c|acct|card|sim|number|connection|wallet|yono|net ?banking|services?|bijli|electricity|power|balance|access)\b(\s+\S+){0,5}\s+(will be |is |has been |hoga |ho jayega |ho jaega |will |)?(block\w*|suspend\w*|deactivat\w*|clos\w*|disconnect\w*|disabled|band|bandh|khatam|kat jayega|cut|terminat\w*|freez\w*|frozen|on hold|hold par|barred|lock\w*|restricted|blacklisted|stop working|be lost|deleted)"
+     + r"|\b(khata|khaata|pension|account)\b(\s+\S+){0,3}\s+(band|bandh|khatam|ruk) (ho|hone|kar)"
      + r"|(खाता|कार्ड|सिम|अकाउंट|बिजली)(\s+\S+){0,5}\s+(बंद|ब्लॉक|निलंबित|काट)"),
     ("urgency", "Creates urgency", "medium",
      "It pushes you to act immediately. Real organisations give you time and never need a reply within minutes.",
      r"\b(urgent\w*|immediately|right now|act now|asap|within \d+ ?(hours?|hrs?|h|minutes?|mins?)|in \d+ ?(hours?|hrs?|minutes?|mins?)|today itself|tonight|by today|at midnight|last (chance|date|day|warning|reminder)|expires? (today|tonight|soon)|turant|jaldi|abhi|aaj (hi|raat)|final (notice|warning)|before \d+ ?(pm|am)|only today|limited time|hurry|(only )?\d+ (seats?|slots?) left|(blocked|suspended|closed|deactivated|expires?|expired|cut|disconnected|stopped|stop) (today|tonight))\b|तुरंत|अभी|आज रात|जल्दी"),
     ("prize", "Promises a prize", "high",
      "It says you won a prize, lottery or reward you never entered. Nobody gives away money by SMS.",
-     r"\b(you (have |'ve )?won|winners?|won\b(?!['’]t)|lottery|lucky (draw|customer|winner)|jackpot|prize|kbc|kaun banega|inaam|jeet\w*|selected for (a )?(reward|gift|prize|cash)|chosen as|chuna gaya|reward points? (expir\w*|worth|redeem)|cashback of|gift (card|voucher|hamper)|voucher worth|bumper|giveaway|free (phone|iphone|car|bike|gift|scooty|samsung)|spin the wheel|scratch card|unclaimed)\b|इनाम|लॉटरी|विजेता|लकी ड्रॉ"),
+     r"\b(you (have |'ve )?won|winners?|won\b(?!['’]t)|lottery|lucky (draw|customer|winner)|jackpot|prize|kbc|kaun banega|inaam|jeet\w*|selected for (a )?(reward|gift|prize|cash)|selected to receive|(has been |have been |is )?awarded|chosen as|chuna gaya|reward points? (expir\w*|worth|redeem)|cashback of|gift (card|voucher|hamper)|voucher worth|bumper|giveaway|free (phone|iphone|car|bike|gift|scooty|samsung)|spin the wheel|scratch card|unclaimed)\b|इनाम|लॉटरी|विजेता|लकी ड्रॉ"),
     ("congrats", "Congratulates you", "low",
      "It opens with congratulations, a common hook in prize and job scams (on its own this means little).",
      r"\b(congratulations?|congrats|mubarak|badhai ho)\b|बधाई"),
@@ -78,7 +86,7 @@ RULES: list[tuple[str, str, str, str, str]] = [
      "It offers easy money for simple online tasks or part-time work. These 'task jobs' end with you paying to withdraw your earnings.",
      r"\b(part[- ]?time|work from home|wfh|home based|online (job|work)|data entry|typing job|like (videos?|posts?)|youtube (likes?|task|videos?)|subscribe (and|&) earn|daily (income|earning|payment)|paid daily"
      + r"|earn\s+(rs\.?|₹|inr)?\s?\d[\d,]*|(rs\.?|₹|inr)?\s?\d[\d,]*\s*(/|per|a)\s*(day|d|review|task|like)\b|kama(o|ye|yein|en)|rozana|ghar baithe|hiring|reviewers? needed|remote (job|role|work)"
-     + r"|(resume|profile)\s+(is\s+)?(shortlisted|selected|matches)|salary \d|task (based|completion|earnings?|commission)|prepaid task|telegram task|commission per task|mentor)\b|पार्ट टाइम|घर बैठे|कमाएं|कमाइए"),
+     + r"|(resume|profile)\s+(is\s+)?(shortlisted|selected|matches)|(you are|you have been|you're|aap) (shortlisted|selected for (the |a )?(job|role|post|position|interview))|onboarding (form|fee|kit)|hr (team|from|department) (of|from|at)?|salary \d|task (based|completion|earnings?|commission)|prepaid task|telegram task|commission per task|mentor)\b|पार्ट टाइम|घर बैठे|कमाएं|कमाइए"),
     ("invest_bait", "Investment bait", "high",
      "It promises guaranteed or very high returns. Real investments never guarantee profit; this is how trading and crypto frauds start.",
      r"\b(guaranteed (returns?|profit|income)|double (your|the)? ?money|paisa double|doubles?\b|double (hota|ho jata)|\d{1,3}\s?% (returns?|profit|monthly|daily|weekly)|\d{1,3}\s?% (\S+\s+)?daily|returns? of \d+\s?%|crypto|bitcoin|usdt|trading (tips|group|signals)|signals|stock tips|insider|ipo allotment|vip (group|trading)|forex|investment plan|gold scheme|high returns?|risk[- ]free|multiply|pakka|for life|lagao|daal de)\b"),
@@ -102,29 +110,79 @@ RULES: list[tuple[str, str, str, str, str]] = [
     ("remote_app", "Asks to install an app", "high",
      "It asks you to install a screen-sharing or unknown app (AnyDesk, TeamViewer, an .apk). That gives the scammer control of your phone.",
      r"\b(anydesk|any desk|teamviewer|team viewer|quick ?support|rustdesk|airdroid|screen ?shar\w*|download (this|the|our) app|install (this|the|our) app|apk)\b|\b(install|download)\s+(\S+\s+){0,3}(app|application)\b(\s+\S+){0,2}\s+(from|at)\b"),
-    ("pressure_secrecy", "Asks you to keep it secret", "medium",
-     "It tells you not to tell anyone or to stay on the call. Scammers isolate victims so nobody can warn them.",
-     r"\b(don'?t tell anyone|do not tell anyone|do not inform|don'?t inform|without telling|keep (this|it) (secret|confidential|private)|stay on (this |the )?(video )?call|kisi ko (mat|na) bata\w*|do not disconnect)\b"),
-    ("money_bait", "Big money offer", "low",
-     "It mentions a large amount of money being offered to you.",
-     r"(rs\.?|inr|₹)\s?\d{1,3}(,\d{2,3})+(,\d{3})?|\b\d+\s?(lakh|lac|crore|cr)\b|लाख"),
+    ("pressure_secrecy", "Keeps you isolated", "high",
+     "It tells you not to tell your family or anyone, or to stay on a (video) call. Scammers isolate victims so nobody can warn them.",
+     r"\b(do ?n[o']?t|don'?t|never) (tell|inform|call|contact)( (anyone|anybody|your family|family|home|mom|mum|dad|papa|parents|police|bank)\w*)"
+     r"|\b(without telling|keep (this|it) (secret|confidential|private)|kisi ko (mat|na) bata\w*|ghar (pe|par|me) mat bata\w*"
+     r"|stay on (this |the |a )?(whatsapp |skype )?(video )?call|join (the |a )?(skype |whatsapp )?video call|video call will be connected"
+     r"|(on|via) skype|do not disconnect|don'?t disconnect)\b|किसी को (मत|न) बता"),
+    ("money_bait", "Big money offered to you", "low",
+     "It offers you a large amount of money (a prize, reward, loan or earnings) that you did not ask for.",
+     r"\b(won|win|winning|prize|reward|lottery|jackpot|inaam|jeet\w*|earn\w*|kama\w*|loan|bonus|cash ?back|claim|receive|get|milenge|paao)\b"
+     r"(\s+\S+){0,5}\s+((rs\.?|inr|₹|\$|usd|gbp|£|€)\s?\d[\d,]*|\d+\s?(lakh|lac|crore|cr|k)\b)"
+     r"|((rs\.?|inr|₹)\s?\d{1,3}(,\d{2,3})+|\d+\s?(lakh|lac|crore|cr)\b)(\s+\S+){0,5}\s+(prize|reward|lottery|jackpot|inaam|loan|cash ?back|bonus|jeet\w*)\b"),
+    ("money_demand", "Asks you to send money", "medium",
+     "It asks you to transfer or deposit money to a person or account. Check who you are really paying through an official channel.",
+     r"\b(transfer|deposit|send|bhej\w*|jama kar\w*)\b(\s+\S+){0,4}\s+((rs\.?|inr|₹)\s?\d[\d,]*|\d[\d,]{2,}\s?(rupees|rs|lakh)?|\d+\s?(lakh|k)\b|money|paise|paisa|amount|any amount)"
+     r"|\b(security|verification|clearance) deposit\b"),
+    ("asks_details", "Asks for your personal / bank details", "medium",
+     "It asks you to send or fill in bank, card, Aadhaar or PAN details. Banks and offices never collect these through SMS, WhatsApp or a form link.",
+     r"\b(confirm|update|submit|share|fill|enter|send|provide|verify|reply with|bhej\w*|batao|bataiye)\b(\s+\S+){0,4}\s+(your |apna |apni |the )?"
+     r"(bank |account |card |personal |kyc |login |netbanking )?(details|detail|information|account number|bank account|a/c (no|number)|ifsc|card number"
+     r"|aadhaa?r( number| card)?|pan( number| card)?|date of birth)\b"
+     r"|\b(aadhaa?r|pan|bank)( number| card| details)?\s*(,|and|aur)\s*(\S+\s+){0,2}(bank|pan|otp|account)\b(\s+\S+){0,3}\s*(bhej|send|share|on whatsapp)"
+     r"|\b(details|detail|jankari|jaankari)\s+(bharo|bhariye|bharein|bhejo|bhejiye|dijiye|do)\b|\b(email|send) (us |me )?your bank details"),
+    ("chain_forward", "Chain forward", "medium",
+     "It asks you to forward the message to many people, or promises luck or threatens loss if you don't. Chain forwards spread hoaxes and scams.",
+     r"\b(forward|share|send)\w* (this|it|the message)?\s?(\S+\s+){0,2}(to|with) (\d+|all|every\w*|your contacts|your friends|groups?|\d+ (people|friends|groups|contacts))\b"
+     r"|\b(share|forward) with \d+|\bforward to all\b|\bfor (good )?luck\b|\bbad luck\b|\bforwarded (as received|many times)\b"
+     r"|\bwhatsapp will (charge|delete|be (paid|closed|shut))|\bdoctors are hiding\b"
+     r"|\b\d+ (groups?|logon|logo|people|log) (me|mein|ko|tak)? ?(share|forward|bhej)\w*"),
+    ("shame_threat", "Threatens to shame you", "high",
+     "It threatens to message your contacts, post your photos or call your relatives. Illegal loan apps and blackmailers use this; report it to 1930.",
+     r"\b(message|call|tell|inform|send (it )?to|share (it )?with|whatsapp)\b(\s+\S+){0,2}\s+(all )?(your )?(contacts|relatives|family members|friends list|phonebook)"
+     r"|\b(post|share|send|leak|upload)\w*\s+(your )?(morphed )?(photos?|pics?|pictures|videos?)\b(\s+\S+){0,4}\s+(online|to|on|with)"
+     r"|\b(you are|as) a (fraud|defaulter|chor)\b|\bdefame\b"),
+    ("donation_request", "Asks for a donation", "medium",
+     "It asks for a donation to a UPI ID, number or account you can't verify. Fake temple, relief and welfare appeals copy real causes.",
+     r"\b(donate|donation|contribute|contribution|daan|seva|bhandara|annadanam|relief fund|welfare fund)\b(\s+\S+){0,12}\s+(upi|\S*@\w+|a/c|account|paytm|gpay|phonepe|send|transfer|pay to|bhej\w*)"
+     r"|\b(pay|send|transfer)\b(\s+\S+){0,6}\s+(for|towards) (the )?(temple|bhandara|annadanam|relief|welfare|seva|donation)"),
     ("click_now", "Pushes you to click", "low",
      "It pushes you to click a link to fix, claim or verify something.",
      r"\b(click|tap|visit|open|go to|kare click|par click|kholiye|kholo)\b(\s+\S+){0,4}\s+(link|here|below|now|to (claim|update|verify|activate|unlock|avoid|get|receive|redeem|apply))|\b(link|link pe|link par)\s+(click|tap|pe pay)|लिंक"),
 ]
 
 # "never install AnyDesk", "do not pay extra" are advice: a negation just before cancels these red flags.
-NEGATABLE = {"asks_secret", "remote_app", "fee", "click_now", "collect_request"}
-NEGATION = re.compile(r"\b(never|do ?n[o']?t|don'?t|not to|mat|kabhi|na kare|nahi)\b(\s+\S+){0,3}\s*\S?$")
+NEGATABLE = {"asks_secret", "remote_app", "fee", "click_now", "collect_request", "money_demand", "asks_details"}
+NEGATION = re.compile(r"\b(never|do ?n[o']?t|don'?t|not to|mat|kabhi|na kare|nahi)\b(\s+[^\s.!?]+){0,3}\s*[^\s.!?]?$")  # stops at a full stop
 
 # Fake family emergency needs two things: a "new number / lost phone" story AND a request for money.
-FAMILY_STORY = re.compile(r"\b(new number|naya number|temporary number|friend'?s (phone|number)|dost ka (phone|number)|lost my phone|broke my phone|phone (is |was )?(broken|kharab|kho|lost|fell|damaged)|phone kho gaya|phone kharab|accident ho gaya|using a friend'?s)\b")
-FAMILY_MONEY = re.compile(r"\b(send|transfer|bhej\w*|need|chahiye|pay)\b(\s+\S+){0,4}\s*(\d|money|paise|paisa|rs|₹|upi)|\d{3,}\s+(bhej\w*|transfer)")
+FAMILY_STORY = re.compile(
+    r"\b(new number|naya number|temporary number|friend'?s (phone|number|mobile|account)|dost ka (phone|number|mobile)"
+    r"|lost my (phone|wallet|purse)|lost (wallet|purse)|broke my phone|phone (got )?(is |was )?(broken|kharab|kho|lost|fell|damaged|stolen)"
+    r"|phone (broke|died)|my phone (fell|got stolen|is dead)|phone kho gaya|phone kharab|phone chori|accident ho gaya|using (a |my )?friend'?s"
+    r"|stuck (at|in) (the )?(airport|station|hospital|police station|customs)|in (the )?hospital|hospital me)\b")
+FAMILY_MONEY = re.compile(r"\b(send|transfer|bhej\w*|need|chahiye|pay|gpay|phonepe)\b(\s+\S+){0,5}\s*(\d|money|paise|paisa|rs|₹|upi|account)|\d{3,}\s+(bhej\w*|transfer)")
 
 GOOD_RULES: list[tuple[str, str, str, str]] = [
     ("otp_dont_share", "Says: do not share OTP",
      "It tells you NOT to share the code with anyone, which is what genuine OTP messages say.",
-     r"(" + NEG_SHARE + r")|(साझा|शेयर) न कर|never asks? for (your )?(otp|pin)|never calls?|(share|give)\s+(\S+\s+){0,4}only (with|to) (the )?(delivery )?(agent|partner|executive|person)"),
+     r"(" + NEG_SHARE + r")|(साझा|शेयर) न कर|never asks? for (your )?(otp|pin)|never calls?"),
+    ("handover_code", "Delivery / ride code",
+     "It gives YOU a code to show the delivery agent or driver in person – that is how genuine delivery and ride OTPs work.",
+     r"\b(share|give|show|tell)\s+(\S+\s+){0,4}(only )?(with|to|at) (the |your )?(delivery|agent|driver|captain|rider|doorstep|door|time of delivery|partner|executive at)"
+     r"|\b(delivery|ride|trip) (otp|code|pin)\b|\b(only )?after (boarding|you receive|receiving|delivery)\b|\bat (the )?(doorstep|door|time of delivery)\b"),
+    ("awareness", "Fraud-awareness message",
+     "It warns you about fraud and points to official channels without asking you for anything – typical of genuine bank and police alerts.",
+     r"\b(beware|fraudsters?|is a scam|are fraud|such messages|never (asks?|sends?|calls?)|will never (ask|call)|do not click (on )?links"
+     r"|stay alert|fraud alert|be careful of|digital arrest is)\b"),
+    ("shop_offer", "Ordinary shopping offer",
+     "It is a normal discount or reward from a shop (coupon code, % off, coins or cashback already added) and asks for no payment or details.",
+     r"\b(\d+\s?% off|use code [a-z0-9]{3,}|with code [a-z0-9]{3,}|coupon|supercoins|reward points? (added|credited|earned)|cashback (has been |is )?(added|credited)"
+     r"|added to your (google pay |gpay |paytm )?(rewards|wallet)|t&c apply)\b"),
+    ("visit_branch", "Sends you to the branch / official app",
+     "It asks you to visit the branch or use the official app yourself, instead of clicking a link or calling a number.",
+     r"\b(visit (your |the |any )?(nearest )?(\S+ ){0,2}branch|at (any|your nearest|the nearest) (\S+ )?branch|through the official app|on the official (portal|app|website))\b"),
     ("masked_account", "Masked account number",
      "It shows only the last digits of your account or card (like XX1234), which is how real bank alerts look.",
      r"\b(a/?c|acct|account|card|ac)\s*(no\.?\s*)?(x{2,}|\*{2,}|ending( with)?\s*|xx)\s*\d{3,4}\b|\b(x{2,}|\*{2,})\d{3,4}\b"),
@@ -179,9 +237,18 @@ def find_flags(text: str, norm: Normalized | None = None) -> tuple[list[Flag], l
             flags.append(_flag_from(norm, m.start(), m.end(), rid, label, sev, reason))
             break  # one highlight per rule is enough
 
-    if any(f.rule == "planned_notice" for f in flags):
+    rules_found = {f.rule for f in flags}
+    if "planned_notice" in rules_found:
         # a scheduled-maintenance notice announces a power cut by definition; that is not a threat
         flags = [f for f in flags if f.rule not in ("disconnection", "threat")]
+    if "handover_code" in rules_found:
+        # "share OTP 4512 with the delivery agent at your door" is how delivery/ride codes work, not a request for a secret
+        flags = [f for f in flags if f.rule not in ("asks_secret", "urgency")]
+    if "otp_dont_share" in rules_found and not re.search(r"\b(otp|code|pin|password|cvv|one time password)\b|ओटीपी|कोड", t):
+        flags = [f for f in flags if f.rule != "otp_dont_share"]  # "do not share" only reassures when it is about a code
+    if "shop_offer" in rules_found and not ({"fee", "asks_secret", "kyc", "money_demand"} & rules_found):
+        # "you won a 50% off coupon" is a normal promotion; only a weak hint if nothing else is wrong
+        flags = [f for f in flags if f.rule not in ("prize", "congrats")]
 
     fm = FAMILY_STORY.search(t)
     if fm and FAMILY_MONEY.search(t):

@@ -3,7 +3,9 @@
 Test sets
   * test      : generated + UCI messages from templates/messages never used in training
   * challenge : 101 hand-written messages (used for error analysis while improving the rules)
-  * final     : 72 hand-written messages written before tuning and never used for error analysis
+  * final     : 72 hand-written messages (v1), written before the first tuning
+  * final_v2  : 68 hand-written messages written before the v2 fixes, never used for error analysis
+  * tester    : 137 messages typed by five persona testers (used for error analysis in v2)
 
 Metrics
   * detection : accuracy, precision, recall, F1 (a message counts as flagged if the verdict is SCAM)
@@ -186,7 +188,9 @@ def main():
     rows = load("messages.csv")
     train_rows = [r for r in rows if r["split"] == "train"]
     test_rows = [r for r in rows if r["split"] == "test"]
-    sets = {"test": test_rows, "challenge": load("challenge.csv"), "final": load("final_test.csv")}
+    tester_all = load("tester_set.csv")
+    sets = {"test": test_rows, "challenge": load("challenge.csv"), "final": load("final_test.csv"),
+            "final_v2": load("final_test_v2.csv"), "tester": [r for r in tester_all if r["label"] in ("SCAM", "SAFE")]}
 
     metrics = {"model": {"size_mb": MODEL_PATH.stat().st_size / 1e6, "t_safe": model.t_safe, "t_scam": model.t_scam,
                          "n_train": model.info.get("n_train"), "n_features": model.info.get("n_features")}}
@@ -211,6 +215,8 @@ def main():
               f"cat_acc={metrics[name].get('category_accuracy', 0):.3f} ECE={metrics[name]['calibration']['ece']:.3f} "
               f"{dt:.1f} ms/msg")
 
+    hoax = [r for r in tester_all if r["label"] == "HOAX"]
+    metrics["hoax_not_safe"] = {"n": len(hoax), "warned": sum(detector.analyze(r["text"], model=model).verdict != "SAFE" for r in hoax)}
     cal = calibration([p for p in all_pairs])
     metrics["calibration_all"] = cal
     plot_reliability(cal, RESULTS / "reliability.png")

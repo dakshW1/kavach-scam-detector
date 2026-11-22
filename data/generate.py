@@ -98,6 +98,14 @@ def fill(tpl: str, kind: str = "") -> str:
         "bankdom": bdom, "tollfree": f"1800{rng.randint(100, 999)}{rng.randint(1000, 9999)}",
         "short": f"{rng.choice(SHORT)}/{code(rng.randint(4, 7))}", "code": code(),
         "vpa": f"{rng.choice(MERCHANTS).lower().replace(' ', '')}@{rng.choice(['ybl', 'axl', 'icici', 'hdfcbank'])}",
+        # slots used by data/templates_v3.py
+        "cdate": f"{rng.randint(1, 28):02d}{rng.choice(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])}{rng.choice(['25', '26', '27'])}",
+        "ddmmyy": f"{rng.randint(1, 28):02d}-{rng.randint(1, 12):02d}-{rng.choice(['25', '26'])}",
+        "small_n": str(rng.choice([45, 99, 120, 250, 349, 500, 780, 1200, 1999, 2500, 4300])),
+        "merch_up": rng.choice(MERCHANTS).upper().replace(" ", ""), "name_up": rng.choice(NAMES).upper() + " " + rng.choice("KRSMPVA"),
+        "bank_lo": bl, "merchant_lo": rng.choice(MERCHANTS).lower().replace(" ", ""), "name_lo": rng.choice(NAMES).lower(),
+        "intl": rng.choice(["852 ", "44 ", "1 ", "63 ", "855 "]) + "".join(rng.choice(string.digits) for _ in range(9)),
+        "acctno": str(rng.randint(10**10, 10**12)),
     }
     fake_bank = rng.choice(FAKE_PATTERNS).format(b=bl)
     proto = rng.choice(["http://", "https://", "", "www.", ""])
@@ -409,6 +417,17 @@ SAFE["personal"] += [
     "Hey can you send me the code for the netflix profile? the one on the tv",
     "Remember to pay the electricity bill before Friday",
 ]
+
+
+import sys as _sys  # noqa: E402
+
+_sys.path.insert(0, str(HERE))
+from templates_v3 import SAFE_V3, SCAM_V3  # noqa: E402  (third batch, see that file for why each group exists)
+
+for _cat, _tpls in SCAM_V3.items():
+    SCAM[_cat] = SCAM[_cat] + _tpls
+for _kind, _tpls in SAFE_V3.items():
+    SAFE[_kind] = SAFE.get(_kind, []) + _tpls
 
 
 def obfuscate(text: str) -> str:

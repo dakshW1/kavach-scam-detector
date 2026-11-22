@@ -29,7 +29,16 @@ OFFICIAL = {
     "NPCI": ["npci.org.in", "bhimupi.org.in"],
     "Paytm": ["paytm.com", "paytmbank.com", "paytm.me"],
     "PhonePe": ["phonepe.com"],
-    "Google Pay": ["pay.google.com", "google.com", "g.co"],
+    "Google Pay": ["pay.google.com"],
+    "Google": ["google.com", "g.co", "withgoogle.com", "youtube.com", "goo.gl"],
+    "CRED": ["cred.club"], "Zerodha": ["zerodha.com"], "Groww": ["groww.in"], "SEBI": ["sebi.gov.in"],
+    "Meesho": ["meesho.com"], "Ajio": ["ajio.com"], "Nykaa": ["nykaa.com"], "Zepto": ["zeptonow.com"], "Blinkit": ["blinkit.com"],
+    "Uber": ["uber.com"], "Ola": ["olacabs.com"], "Rapido": ["rapido.bike"],
+    "DigiLocker": ["digilocker.gov.in"], "Parivahan / e-Challan": ["parivahan.gov.in", "echallan.parivahan.gov.in"],
+    "Jeevan Pramaan": ["jeevanpramaan.gov.in"], "PM-Kisan": ["pmkisan.gov.in"], "Passport Seva": ["passportindia.gov.in"],
+    "FASTag": ["ihmcl.co.in", "nhai.gov.in", "npci.org.in"], "MSEDCL": ["mahadiscom.in"], "BSES": ["bsesdelhi.com"],
+    "Tata Power": ["tatapower.com"], "Indane": ["indane.co.in", "iocl.com"], "Bharat Gas": ["ebharatgas.com"],
+    "Instagram": ["instagram.com"], "Facebook": ["facebook.com"], "Telegram": ["telegram.org"],
     "Amazon": ["amazon.in", "amazon.com", "amzn.in", "amzn.to", "a.co"],
     "Flipkart": ["flipkart.com", "fkrt.it", "dl.flipkart.com"],
     "Myntra": ["myntra.com", "myntr.it"],
@@ -73,7 +82,20 @@ BRAND_WORDS = {
     "EPFO": ["epfo", "epf ", "pf account"], "UIDAI (Aadhaar)": ["aadhaar", "aadhar", "uidai"],
     "TRAI": ["trai"], "IRCTC": ["irctc"], "LIC": ["lic policy", " lic "], "WhatsApp": ["whatsapp"],
     "Netflix": ["netflix"], "Customs": ["customs"], "Police / CBI": ["cbi", "police", "cyber cell", "narcotics"],
+    "DigiLocker": ["digilocker"], "Parivahan / e-Challan": ["parivahan", "echallan", "e-challan"],
+    "Jeevan Pramaan": ["jeevan pramaan", "jeevanpramaan", "life certificate"], "PM-Kisan": ["pm kisan", "pmkisan"],
+    "FASTag": ["fastag"], "MSEDCL": ["msedcl", "mahadiscom", "mahavitaran"], "Indane": ["indane"], "SEBI": ["sebi"],
+    "Meesho": ["meesho"], "Zerodha": ["zerodha"], "Groww": ["groww"], "CRED": ["cred app"],
 }
+
+# Free website builders, form builders and hosting: anyone can make a page here in minutes, so a "bank" or
+# "government" page on these is a classic phishing trick. They are never treated as the brand's official site.
+FREE_HOSTS = ["sites.google.com", "docs.google.com", "forms.gle", "blogspot.com", "blogspot.in", "wordpress.com", "wixsite.com",
+              "weebly.com", "github.io", "netlify.app", "vercel.app", "web.app", "firebaseapp.com", "pages.dev", "glitch.me",
+              "000webhostapp.com", "carrd.co", "linktr.ee", "notion.site", "typeform.com", "jotform.com", "surveyheart.com",
+              "onrender.com", "herokuapp.com", "replit.app", "godaddysites.com", "mystrikingly.com", "square.site", "webflow.io",
+              "framer.website", "my.canva.site", "tilda.ws", "yolasite.com", "ngrok.io", "ngrok-free.app", "trycloudflare.com"]
+SENSITIVE_WORDS = r"(bank|account|details|card|netbanking|password|otp|sbi|hdfc|icici|axis|kotak|pnb|kyc|pan|aadhaa?r|uidai|reward|refund|verify|verification|login|update|customer|care|support|gov|yojana|scheme|pension|loan|tax|challan|electricity|bill|parcel|courier|claim|prize|offer)"
 
 SHORTENERS = {"bit.ly", "tinyurl.com", "t.ly", "is.gd", "cutt.ly", "rb.gy", "goo.gl", "ow.ly",
               "shorturl.at", "tiny.cc", "rebrand.ly", "s.id", "v.gd", "short.gy", "t.co", "bitly.com",
@@ -174,7 +196,7 @@ def official_for(host: str) -> str | None:
     return None
 
 
-def inspect_url(raw: str, start: int, end: int, mentioned_brands: list[str]) -> LinkFinding:
+def inspect_url(raw: str, start: int, end: int, mentioned_brands: list[str], context: str = "") -> LinkFinding:
     url = raw.rstrip(".,;:!?)]}'\"")
     end = start + len(url)
     u = re.sub(r"(?i)^hxxp", "http", url).replace("[.]", ".").replace("(.)", ".")
@@ -196,6 +218,23 @@ def inspect_url(raw: str, start: int, end: int, mentioned_brands: list[str]) -> 
         return f
     except ValueError:
         pass
+
+    path = u[len(host_part):].lower()
+    free = next((fh for fh in FREE_HOSTS if host == fh or host.endswith("." + fh)), None)
+    if free and not (free == "docs.google.com" and "/forms" not in path):
+        if free.count(".") >= 2:
+            f.registered = free  # show "sites.google.com", not just "google.com"
+        named = [b for b in mentioned_brands if b in OFFICIAL and b != "Google"]
+        f.issues.append(f"{free} is a free website or form builder: anyone can create a page here in minutes. "
+                        "Real banks, companies and government offices do not collect your details on such pages.")
+        if named:
+            f.issues.append(f"The message talks about {named[0]}, but this page is not on any official {named[0]} website "
+                            f"(official: {', '.join(OFFICIAL[named[0]][:2])}).")
+        if named or re.search(SENSITIVE_WORDS, host + path) or re.search(SENSITIVE_WORDS, context):
+            f.verdict = "dangerous"
+        else:
+            f.verdict = "suspicious"
+        return f
 
     brand = official_for(host)
     if brand:
@@ -230,9 +269,18 @@ def inspect_url(raw: str, start: int, end: int, mentioned_brands: list[str]) -> 
             f.verdict = "dangerous"
             break
 
+    # pretends to be a government site: ".gov.in" in the middle of the address, or "gov" glued into another domain
+    if ".gov.in." in host + "." and not (host.endswith(".gov.in") or host.endswith(".nic.in")):
+        f.issues.append(f"The address contains 'gov.in' to look official, but the real website is '{reg}', which is not a government domain.")
+        f.verdict = "dangerous"
+    elif re.search(r"(^|[-.])gov([-.]|$)|-gov|gov-|govt", reg.split(".")[0] + ("." + ".".join(reg.split(".")[1:-1]) if reg.count(".") > 1 else "")):
+        f.issues.append(f"'{reg}' uses the word 'gov' to look like a government website, but real Indian government sites end in "
+                        "'.gov.in' or '.nic.in'.")
+        f.verdict = "dangerous"
+
     tld = reg.rsplit(".", 1)[-1]
     if tld in RISKY_TLDS and reg not in SHORTENERS:
-        f.issues.append(f"The domain ends in '.{tld}', a cheap ending often used for throw-away scam sites; no Indian bank uses it.")
+        f.issues.append(f"The domain ends in '.{tld}', a cheap ending often used for throw-away scam sites and rarely used by genuine Indian companies.")
         f.verdict = "suspicious" if f.verdict == "unknown" else f.verdict
 
     # brand impersonation: brand name inside a domain that is not that brand's
@@ -295,7 +343,12 @@ def find_links(text: str, mentioned_brands: list[str] | None = None) -> list[Lin
             # "logged.in", "go.to" style words: only accept if it is a known domain
             if not official_for(raw.lower()) and raw.lower() not in SHORTENERS:
                 continue
-        out.append(inspect_url(raw, m.start(), m.end(), mentioned_brands))
+        out.append(inspect_url(raw, m.start(), m.end(), mentioned_brands, text.lower()))
+    for m in re.finditer(r"(?i)\b(javascript|data|vbscript):[^\s]+", text):
+        out.append(LinkFinding(url=m.group(), start=m.start(), end=m.end(), host=m.group(1).lower() + ":",
+                               registered=m.group(1).lower() + ":", verdict="dangerous",
+                               issues=[f"This is a '{m.group(1).lower()}:' link: it runs code instead of opening a website. "
+                                       "Genuine messages never contain such links."]))
     return out
 
 
@@ -309,4 +362,6 @@ def phone_numbers(text: str) -> list[tuple[int, int, str, str]]:
         res.append((m.start(), m.end(), m.group(), "mobile"))
     for m in re.finditer(r"(?<!\d)(1800[\s-]?\d{3}[\s-]?\d{3,4}|1860[\s-]?\d{3}[\s-]?\d{4}|1930|1909|155260)(?!\d)", text):
         res.append((m.start(), m.end(), m.group(), "tollfree"))
+    for m in re.finditer(r"(?<![\w+])\+(?!91)(\d{1,3})[\s-]?\d[\d\s-]{6,13}\d(?!\d)", text):
+        res.append((m.start(), m.end(), m.group(), "international"))  # e.g. +852..., +44..., common in job/investment scams
     return res

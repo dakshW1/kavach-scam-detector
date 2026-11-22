@@ -105,7 +105,10 @@ def normalize(text: str) -> Normalized:
         if re.fullmatch(r"\W*(rs\.?|inr|₹)?[\d.,]+(am|pm|st|nd|rd|th|gb|mb|kb|kg|km|ml|hrs?|mins?|days?|k|l|g|x|cr|lakh|lac)?\W*",
                         word):
             continue  # times, amounts and units such as "10am", "2gb", "rs.500", "5lakh"
-        if re.match(r"(https?://|www\.)", word) or re.fullmatch(r"[\w.\-]+@[a-z]{3,}(\.[a-z]{2,})*", word.rstrip(".,!?")):
+        if re.search(r"\d{1,2}(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)\d{0,4}", word) \
+                or re.search(r"[2689]", word):
+            continue  # dates like "23nov26", or digits that never stand for letters (2, 6, 8 as part of numbers, 9)
+        if re.match(r"(https?://|www\.)", word) or re.search(r"[a-z0-9-]+\.[a-z]{2,}(/|$)", word) or re.fullmatch(r"[\w.\-]+@[a-z]{3,}(\.[a-z]{2,})*", word.rstrip(".,!?")):
             continue  # don't rewrite links, e-mail addresses or UPI IDs
         for j, c in enumerate(word):
             if c in LEET:
