@@ -37,9 +37,14 @@ You need Python 3.11 or newer. No GPU, no API keys and no internet are needed af
 python -m venv .venv
 .venv\Scripts\activate            # Windows   (macOS/Linux: source .venv/bin/activate)
 pip install -r requirements.txt
-streamlit run app.py              # then open http://localhost:8501
+python server.py                  # the website: open http://127.0.0.1:8000
 pytest                            # 34 tests, including the privacy proof
 ```
+
+The website is already built (`web/dist`), so Node.js is **not** needed to run it. A simpler Streamlit version of the
+same app is also included: `streamlit run app.py` (http://localhost:8501).
+
+To change the website's code, rebuild it with Node.js 20+: `cd web && npm install && npm run build`.
 
 The trained model (`models/kavach.joblib`, 1.2 MB) is included. To rebuild everything from scratch:
 
@@ -90,16 +95,16 @@ Every number is on messages the model never saw during training (from `results/m
 
 | Test set | Messages | Accuracy | Scams caught (SCAM or SUSPICIOUS) | Genuine marked SCAM | Genuine marked SUSPICIOUS | Category accuracy |
 |---|---|---|---|---|---|---|
-| **Final test** (hand-written, written before tuning, never used to improve the model) | 72 | 95.8% | 100% (37/37) | 5.7% (2/35) | 5.7% (2/35) | 97.3% |
-| Challenge set (hand-written, used for error analysis) | 101 | 95.0% | 100% (53/53) | 6.2% (3/48) | 2.1% (1/48) | 84.9% |
-| Held-out templates + UCI messages (split by template) | 1,101 | 98.4% | 96.6% | 0.1% | 1.8% | 80.1% |
+| **Final test** (hand-written, written before tuning, never used to improve the model) | 72 | 97.2% | 100% (37/37) | 5.7% (2/35) | 5.7% (2/35) | 97.3% |
+| Challenge set (hand-written, used for error analysis) | 101 | 96.0% | 98.1% (52/53) | 6.2% (3/48) | 4.2% (2/48) | 84.6% |
+| Held-out templates + UCI messages (split by template) | 1,101 | 98.4% | 97.1% | 0.1% | 1.2% | 79.7% |
 
 - **Languages (final test):** English 21/21, Hinglish 6/6, Hindi 5/5 and disguised 5/5 scams caught.
 - **Real bank alerts, OTPs and deliveries (final test):** none marked SCAM. 1 of 7 bank alerts was marked SUSPICIOUS.
 - **Confidence reliability:** expected calibration error 0.006, Brier score 0.016 (all test sets together). The chart
   is in `results/reliability.png`.
-- **Disguised text:** test scams were caught 96.7% of the time as written and 99.2% after random disguise tricks.
-  Retrained without the cleaner, the model catches 94.8% of the disguised copies. The character n-grams already give
+- **Disguised text:** test scams were caught 97.2% of the time as written and 99.2% after random disguise tricks.
+  Retrained without the cleaner, the model catches 95.6% of the disguised copies. The character n-grams already give
   some robustness, and the cleaner adds the rest.
 - **Speed:** about 15–25 ms per message on a laptop CPU. The model is 1.2 MB.
 
@@ -139,7 +144,9 @@ The split is **by template**: messages generated from one template are either al
 ## Project layout
 
 ```
-app.py                Streamlit entry point (turns on the network guard first)
+server.py             website server: local API + web/dist (turns on the network guard first)
+web/                  React + Vite website (src/ = code, dist/ = built site, src/reactbits/ = React Bits components)
+app.py                simpler Streamlit version of the same app
 kavach/
   normalize.py        text cleaner with position mapping
   rules.py            red-flag and reassuring-sign rules
@@ -152,7 +159,7 @@ kavach/
   redact.py           masks private details
   netguard.py         blocks all outgoing connections
   intel.py            optional online news search
-ui/                   one file per page
+ui/                   Streamlit pages
 data/                 dataset builders, UCI data, generated and hand-written sets
 scripts/              train.py, evaluate.py
 tests/                test_core.py, test_privacy.py
@@ -173,7 +180,14 @@ results/              metrics.json, reliability.png
 ## Credits and AI assistance
 
 - Dataset: UCI SMS Spam Collection (CC BY 4.0).
-- Libraries: scikit-learn, Streamlit, pandas, matplotlib, ReportLab, uharfbuzz.
+- Libraries: scikit-learn, FastAPI, Streamlit, pandas, matplotlib, ReportLab, uharfbuzz.
+- Website design: [Lenis](https://github.com/darkroomengineering/lenis) (smooth scrolling, MIT),
+  [Vanta.js](https://github.com/tengbao/vanta) + three.js (animated 3D network in the hero, MIT),
+  [React Bits](https://github.com/DavidHDev/react-bits) by David Haz (BlurText, ShinyText, DecryptedText, CountUp,
+  SpotlightCard, StarBorder, ClickSpark, FadeContent and Magnet, copied into `web/src/reactbits/`; MIT + Commons
+  Clause, licence included), Motion and GSAP for animation, and Fontsource for the fonts (Bricolage Grotesque, Manrope,
+  Instrument Serif and Noto Sans Devanagari, all bundled locally). The visual language follows my earlier projects
+  Kilometre, Clausewise and Approvals.
 - Scam descriptions and recovery steps are based on public advice from RBI, cybercrime.gov.in (1930) and Sanchar
   Saathi.
 - **AI assistance:** this project was built with the help of an AI coding assistant (code, templates and
