@@ -73,7 +73,7 @@ export function Legend() {
     <div className="legend">
       <span><i style={{ background: 'var(--bad-soft)', boxShadow: 'inset 0 -2px 0 var(--bad)' }} />serious red flag</span>
       <span><i style={{ background: 'var(--warn-soft)', boxShadow: 'inset 0 -2px 0 var(--warn)' }} />warning sign</span>
-      <span><i style={{ background: '#f4f0e2' }} />minor sign</span>
+      <span><i style={{ background: 'var(--low-soft)', boxShadow: 'inset 0 -2px 0 var(--low-line)' }} />minor sign</span>
       <span><i style={{ background: 'var(--ok-soft)', boxShadow: 'inset 0 -2px 0 var(--ok)' }} />reassuring sign</span>
       <span>· hover a highlight for the reason</span>
     </div>

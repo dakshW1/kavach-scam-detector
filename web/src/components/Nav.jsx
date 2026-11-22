@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { PAGES } from '../App.jsx';
+import ThemeToggle from './ThemeToggle.jsx';
 
 export function Logo() {
   return (
     <svg viewBox="0 0 64 64" aria-hidden="true">
-      <path d="M32 4 8 13v17c0 15 10 26 24 30 14-4 24-15 24-30V13L32 4z" fill="#141414" />
+      <path d="M32 4 8 13v17c0 15 10 26 24 30 14-4 24-15 24-30V13L32 4z" fill="currentColor" />
       <path d="M22 32l7 7 13-14" stroke="#8fcba8" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -34,6 +35,7 @@ export default function Nav({ page, go, privacy }) {
           </button>
         ))}
       </div>
+      <ThemeToggle />
       <div ref={ref} style={{ position: 'relative' }}>
         <button className="privacy-pill" onClick={() => setOpen(o => !o)} aria-expanded={open}>
           <span className={`dot ${blocked === false ? 'off' : ''}`} />

@@ -96,7 +96,7 @@ export default function Diary({ onChange }) {
                   <div><div className="kicker" style={{ color: 'var(--night-muted)' }}>Warn your family and friends</div>
                     <h2 style={{ color: '#fff', fontSize: '2.2rem' }}>One tap, <span className="serif" style={{ color: 'var(--glow-money)' }}>two languages.</span></h2></div>
                   <div className="row">{[[7, '7 days'], [30, '30 days'], [3650, 'everything']].map(([v, l]) => (
-                    <button key={v} className="chip" style={days === v ? { background: '#fff', color: 'var(--ink)' } : {}} onClick={() => setDays(v)}>{l}</button>))}</div>
+                    <button key={v} className="chip" style={days === v ? { background: '#fff', color: '#141414' } : {}} onClick={() => setDays(v)}>{l}</button>))}</div>
                 </div>
                 <p className="muted small" style={{ marginBottom: 14 }}>Scam patterns only – no personal details. Kavach never sends it: you copy or download it and share it yourself.</p>
                 {alert && (
