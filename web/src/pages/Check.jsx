@@ -10,6 +10,7 @@ import Reveal from '../components/Reveal.jsx';
 import Tabs from '../components/Tabs.jsx';
 import { Decoded, FlagList, HighlightedMessage, Legend, LinkCards, VerdictCard, mergeFlags } from '../components/ResultParts.jsx';
 import { ReportTab, GuideTab, IntelTab, HoodTab, TodoTab } from '../components/ResultTabs.jsx';
+import { GenuineSummary, PassedChecks, StayCareful } from '../components/GenuinePanel.jsx';
 import { api } from '../api.js';
 import { lenis } from '../App.jsx';
 
@@ -136,7 +137,10 @@ export default function Check({ onChange }) {
                   {(() => { const bad = rv.flags.filter(f => f.severity !== 'good').length; const ok = rv.flags.length - bad;
                     return [bad && `${bad} warning sign${bad > 1 ? 's' : ''}`, ok && `${ok} good sign${ok > 1 ? 's' : ''}`].filter(Boolean).join(' · ') || 'Why?'; })()}
                 </div>
+                {rv.verdict === 'SAFE' && <GenuineSummary g={rv.genuine} />}
                 <FlagList r={rv} focus={focus} onPick={setFocus} />
+                {rv.verdict === 'SAFE' && <><PassedChecks g={rv.genuine} /><StayCareful g={rv.genuine} /></>}
+                {rv.verdict === 'SUSPICIOUS' && <PassedChecks g={rv.genuine} compact />}
                 {r.sender_note && <p className="small muted" style={{ marginTop: 10 }}>Sender: {r.sender_note}</p>}
               </div>
             </div>

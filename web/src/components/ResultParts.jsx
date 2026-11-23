@@ -112,7 +112,7 @@ export function FlagList({ r, focus = null, onPick }) {
   }, [focus]);
 
   const [all, setAll] = useState(false);
-  if (!r.flags.length) return <p className="muted">No specific warning or reassuring signs; the verdict comes from the model's reading of the wording.</p>;
+  if (!r.flags.length) return r.verdict === 'SAFE' ? null : <p className="muted">No specific warning signs; the verdict comes from the model's reading of the wording.</p>;
   const n = r.flags.length;
   const LIMIT = 4;
   const shown = all || (focus != null && focus >= LIMIT) ? r.flags : r.flags.slice(0, LIMIT);

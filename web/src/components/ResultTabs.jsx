@@ -12,7 +12,12 @@ function Copy({ text }) {
 }
 
 export function TodoTab({ r }) {
-  if (r.verdict === 'SAFE') return <p>This message looks genuine. Still: never share OTPs, PINs or passwords, and make payments only in official apps.</p>;
+  if (r.verdict === 'SAFE') return (
+    <div className="stack">
+      <p><b>{r.genuine?.summary}</b></p>
+      <ul className="clean">{(r.genuine?.cautions || []).map(c => <li key={c}>{c}</li>)}</ul>
+    </div>
+  );
   return (
     <div className="grid-2">
       <div>
