@@ -95,8 +95,18 @@ def api_analyze(m: Msg):
     if not m.text.strip():
         raise HTTPException(400, "Paste a message first.")
     res = analyze(m.text, m.sender)
-    saved = diary.add(res) if m.save else None
-    return result_json(res, saved)
+    previous = diary.lookup(res) if m.save else None
+    if previous and previous["match"] == "similar" and previous["verdict"] in ("SCAM", "SUSPICIOUS") and res.verdict == "SAFE":
+        # keep tagging consistent: a near-copy of a message that was a scam before is not waved through as safe
+        res.verdict = "SUSPICIOUS"
+        res.safety_net = (f"A very similar message ({int(previous['similarity'] * 100)}% alike) was marked {previous['verdict']} "
+                          "when you checked it before, so treat this one with the same care.")
+    saved = diary.add(res, previous=previous) if m.save else None
+    if m.save:
+        diary.remember(res)
+    out = result_json(res, saved)
+    out["previous"] = previous
+    return out
 
 
 @app.post("/api/report")

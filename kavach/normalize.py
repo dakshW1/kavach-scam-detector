@@ -105,6 +105,9 @@ def normalize(text: str) -> Normalized:
         if re.fullmatch(r"\W*(rs\.?|inr|₹)?[\d.,]+(am|pm|st|nd|rd|th|gb|mb|kb|kg|km|ml|hrs?|mins?|days?|k|l|g|x|cr|lakh|lac)?\W*",
                         word):
             continue  # times, amounts and units such as "10am", "2gb", "rs.500", "5lakh"
+        orig = text[origin[m.start()]:origin[m.end() - 1] + 1]
+        if re.fullmatch(r"\W*[A-Z]{3,}\d{2,4}\W*", orig):
+            continue  # coupon / promo codes like "SAVE30", "FEAST40" are not disguised words
         if re.search(r"\d{1,2}(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)\d{0,4}", word) \
                 or re.search(r"[2689]", word):
             continue  # dates like "23nov26", or digits that never stand for letters (2, 6, 8 as part of numbers, 9)

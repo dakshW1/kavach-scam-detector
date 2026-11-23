@@ -75,7 +75,7 @@ export default function Diary({ onChange }) {
       ) : (
         <>
           <div className="grid-4" style={{ marginTop: 24 }}>
-            <div className="stat"><div className="v">{st.total}</div><div className="l">scam messages logged</div></div>
+            <div className="stat"><div className="v">{st.total}</div><div className="l">different scam messages{st.received > st.total ? ` (received ${st.received} times)` : ''}</div></div>
             <div className="stat"><div className="v" style={{ color: 'var(--bad)' }}>{st.scam}</div><div className="l">marked SCAM</div></div>
             <div className="stat"><div className="v" style={{ color: 'var(--warn)' }}>{st.suspicious}</div><div className="l">marked suspicious</div></div>
             <div className="stat"><div className="v" style={{ fontSize: '1.6rem', paddingTop: 10 }}>{topType}</div><div className="l">most common type</div></div>
@@ -120,6 +120,7 @@ export default function Diary({ onChange }) {
                     <div className="row" style={{ gap: 8 }}>
                       <span className={`tag ${e.verdict === 'SCAM' ? 'bad' : 'warn'}`}>{e.verdict}</span>
                       <b>{e.category || 'Other'}</b><span className="small muted">{e.ts.replace('T', ' ')} · scam probability {pct(e.confidence)}</span>
+                      {(e.times_seen || 1) > 1 && <span className="tag info">received ×{e.times_seen} · last {(e.last_seen || e.ts).replace('T', ' ').slice(0, 16)}</span>}
                     </div>
                     <p className="small" style={{ marginTop: 8, color: 'var(--ink-2)' }}>{e.snippet}</p>
                     {e.flags.length > 0 && <p className="small muted" style={{ marginTop: 4 }}>Signs: {e.flags.join(', ')}</p>}

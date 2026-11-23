@@ -9,14 +9,21 @@ Privacy rules (enforced here, checked by tests/test_privacy.py):
 """
 from __future__ import annotations
 
+import hashlib
+import hmac
 import io
 import json
+import os
+import re
+import secrets
 import sqlite3
 from contextlib import contextmanager
 from collections import Counter
 from datetime import datetime, timedelta
+from difflib import SequenceMatcher
 from pathlib import Path
 
+from .normalize import normalize
 from .redact import redact
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -27,14 +34,16 @@ DEFAULTS = {"diary_enabled": False, "auto_delete_days": 0}
 
 
 # ------------------------------------------------------------------ settings
-def settings(path: Path = SETTINGS_PATH) -> dict:
+def settings(path: Path | None = None) -> dict:
+    path = path or SETTINGS_PATH
     try:
         return {**DEFAULTS, **json.loads(path.read_text(encoding="utf-8"))}
     except (OSError, ValueError):
         return dict(DEFAULTS)
 
 
-def save_settings(values: dict, path: Path = SETTINGS_PATH) -> None:
+def save_settings(values: dict, path: Path | None = None) -> None:
+    path = path or SETTINGS_PATH
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps({**settings(path), **values}, indent=2), encoding="utf-8")
 
@@ -61,24 +70,122 @@ def _init(con: sqlite3.Connection) -> None:
     con.execute("""CREATE TABLE IF NOT EXISTS entries (
         id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL, verdict TEXT, category TEXT, family TEXT,
         confidence REAL, flags TEXT, brands TEXT, link_domains TEXT, snippet TEXT)""")
+    cols = {r[1] for r in con.execute("PRAGMA table_info(entries)")}
+    for col, decl in (("times_seen", "INTEGER DEFAULT 1"), ("last_seen", "TEXT"), ("fp", "TEXT")):
+        if col not in cols:  # older diary files: add the new columns in place
+            con.execute(f"ALTER TABLE entries ADD COLUMN {col} {decl}")
 
 
-def add(result, path: Path = DB_PATH) -> int | None:
-    """Save the lesson from one checked message. Does nothing unless the diary is enabled."""
+# ------------------------------------------------------------------ "already checked" (repeat detection)
+# Two ways to recognise a message seen before, without ever storing the message itself:
+#  * SAME:    a keyed fingerprint (HMAC-SHA256) of the cleaned text. One-way: the message cannot be read back from it.
+#  * SIMILAR: the masked snippet (numbers, codes, links already removed) compared with earlier snippets, so the same scam
+#             sent again with a different phone number, link or amount is recognised too.
+# With the diary OFF, a short in-memory list (lost when the app closes) still lets Kavach say "you checked this
+# earlier in this session". Nothing is written to disk in that case.
+SIMILAR_MIN = 0.85
+_SESSION: list[dict] = []
+_SESSION_SALT = os.urandom(16)
+
+
+def _salt() -> bytes:
+    """Per-installation key for diary fingerprints (created on first use, stored next to the diary)."""
+    s = settings()
+    if not s.get("fp_salt"):
+        save_settings({"fp_salt": secrets.token_hex(16)})
+        s = settings()
+    return bytes.fromhex(s["fp_salt"])
+
+
+def _fp(text: str, salt: bytes) -> str:
+    return hmac.new(salt, normalize(text).text.encode("utf-8"), hashlib.sha256).hexdigest()
+
+
+def _snippet(text: str) -> str:
+    s = redact(text)
+    return s[:277] + "..." if len(s) > 280 else s
+
+
+def _shape(snippet: str) -> str:
+    """Comparable form of a masked snippet: lowercase words, placeholders and digits collapsed."""
+    s = normalize(snippet).text
+    s = re.sub(r"hxxps?://\S+|\S+\[\.\]\S+", " LINK ", s)
+    s = re.sub(r"\d[\d,.]*", "0", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def similarity(a: str, b: str) -> float:
+    a, b = _shape(a), _shape(b)
+    if not a or not b:
+        return 0.0
+    wa, wb = set(a.split()), set(b.split())
+    if len(wa & wb) / max(1, len(wa | wb)) < 0.4:   # cheap filter before the exact comparison
+        return 0.0
+    return SequenceMatcher(None, a, b).ratio()
+
+
+def lookup(result, path: Path = DB_PATH) -> dict | None:
+    """Has this message (or a very similar one) been checked before? Call BEFORE add()/remember()."""
+    snip = _snippet(result.text)
+    best = None
+    if path.exists():
+        fp = _fp(result.text, _salt())
+        for e in entries(path):
+            if e.get("fp") == fp:
+                return {"match": "same", "similarity": 1.0, "source": "diary", "ts": e["ts"], "last_seen": e.get("last_seen") or e["ts"],
+                        "times_seen": e.get("times_seen") or 1, "verdict": e["verdict"], "category": e["category"],
+                        "snippet": e["snippet"], "id": e["id"]}
+            sim = similarity(snip, e["snippet"])
+            if sim >= SIMILAR_MIN and (not best or sim > best["similarity"]):
+                best = {"match": "similar", "similarity": round(sim, 2), "source": "diary", "ts": e["ts"],
+                        "last_seen": e.get("last_seen") or e["ts"], "times_seen": e.get("times_seen") or 1,
+                        "verdict": e["verdict"], "category": e["category"], "snippet": e["snippet"], "id": e["id"]}
+    sfp = _fp(result.text, _SESSION_SALT)
+    for e in reversed(_SESSION):
+        if e["fp"] == sfp:
+            return {"match": "same", "similarity": 1.0, "source": "session", "ts": e["ts"], "last_seen": e["ts"],
+                    "times_seen": e["n"], "verdict": e["verdict"], "category": e["category"], "snippet": e["snippet"], "id": None}
+        if not best:
+            sim = similarity(snip, e["snippet"])
+            if sim >= SIMILAR_MIN:
+                best = {"match": "similar", "similarity": round(sim, 2), "source": "session", "ts": e["ts"], "last_seen": e["ts"],
+                        "times_seen": e["n"], "verdict": e["verdict"], "category": e["category"], "snippet": e["snippet"], "id": None}
+    return best
+
+
+def remember(result) -> None:
+    """In-memory only: lets Kavach recognise repeats during this session even when the diary is off."""
+    sfp = _fp(result.text, _SESSION_SALT)
+    for e in _SESSION:
+        if e["fp"] == sfp:
+            e["n"] += 1
+            return
+    _SESSION.append({"fp": sfp, "snippet": _snippet(result.text), "verdict": result.verdict, "category": result.category,
+                     "ts": datetime.now().isoformat(timespec="seconds"), "n": 1})
+    del _SESSION[:-200]
+
+
+def add(result, path: Path = DB_PATH, previous: dict | None = None) -> dict | None:
+    """Save the lesson from one checked message. Does nothing unless the diary is enabled.
+    The same or a very similar message is NOT stored twice: the existing entry's count goes up instead."""
     if not is_enabled() or result.verdict == "SAFE":
         return None
-    snippet = redact(result.text)
-    if len(snippet) > 280:
-        snippet = snippet[:277] + "..."
+    now = datetime.now().isoformat(timespec="seconds")
+    if previous and previous.get("source") == "diary" and previous.get("id"):
+        with _db(path) as con:
+            con.execute("UPDATE entries SET times_seen = COALESCE(times_seen, 1) + 1, last_seen = ? WHERE id = ?",
+                        (now, previous["id"]))
+            n = con.execute("SELECT times_seen FROM entries WHERE id = ?", (previous["id"],)).fetchone()[0]
+        return {"id": previous["id"], "updated": True, "times_seen": n}
     domains = sorted({lf.registered.replace(".", "[.]") for lf in result.links if lf.verdict != "official"})
     with _db(path) as con:
         cur = con.execute(
-            "INSERT INTO entries (ts, verdict, category, family, confidence, flags, brands, link_domains, snippet) "
-            "VALUES (?,?,?,?,?,?,?,?,?)",
-            (datetime.now().isoformat(timespec="seconds"), result.verdict, result.category, result.family,
+            "INSERT INTO entries (ts, verdict, category, family, confidence, flags, brands, link_domains, snippet, "
+            "times_seen, last_seen, fp) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+            (now, result.verdict, result.category, result.family,
              round(result.p_scam, 3), json.dumps(sorted({f.label for f in result.red_flags})),
-             json.dumps(result.brands), json.dumps(domains), snippet))
-        return cur.lastrowid
+             json.dumps(result.brands), json.dumps(domains), _snippet(result.text), 1, now, _fp(result.text, _salt())))
+        return {"id": cur.lastrowid, "updated": False, "times_seen": 1}
 
 
 def entries(path: Path = DB_PATH) -> list[dict]:
@@ -129,7 +236,9 @@ def stats(rows: list[dict]) -> dict:
         d = datetime.fromisoformat(r["ts"])
         weeks[(d - timedelta(days=d.weekday())).date()] += 1
     return {
-        "total": len(rows),
+        "total": len(rows),                                              # different scam messages
+        "received": sum((r.get("times_seen") or 1) for r in rows),      # including repeats
+        "repeats": sum(1 for r in rows if (r.get("times_seen") or 1) > 1),
         "scam": sum(r["verdict"] == "SCAM" for r in rows),
         "suspicious": sum(r["verdict"] == "SUSPICIOUS" for r in rows),
         "by_category": Counter(r["category"] or "Other" for r in rows),

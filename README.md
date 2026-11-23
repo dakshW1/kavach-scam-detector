@@ -93,7 +93,7 @@ Every number is on messages the model never saw during training (from `results/m
 
 | Test set | Messages | Accuracy | Scams caught (SCAM or SUSPICIOUS) | Genuine marked SCAM | Genuine marked SUSPICIOUS | Category accuracy |
 |---|---|---|---|---|---|---|
-| **Final test v2** (hand-written before the v2 fixes, never used to improve the model) | 68 | 98.5% | 34/35 | 0/33 | 2/33 | 97.1% |
+| **Final test v2** (hand-written before the v2 fixes, never used to improve the model) | 68 | 98.5% | 34/35 | 0/33 | 3/33 | 97.1% |
 | Final test v1 (hand-written before the first tuning) | 72 | 97.2% | 37/37 | 1/35 | 1/35 | 91.9% |
 | Messages typed by 5 persona testers (used for error analysis) | 137 | 97.8% | 83/83 | 2/54 | 0/54 | 94.0% |
 | Challenge set (hand-written, used for error analysis) | 101 | 96.0% | 53/53 | 1/48 | 2/48 | 86.8% |
@@ -101,9 +101,9 @@ Every number is on messages the model never saw during training (from `results/m
 
 - **Real delivery OTPs, bank alerts and OTPs (final test v2):** none marked SCAM or SUSPICIOUS.
 - **Chain forwards and hoaxes:** both hoaxes in the tester set are flagged, not called SAFE.
-- **Confidence reliability:** expected calibration error 0.020, Brier score 0.015 (all test sets together). Most
+- **Confidence reliability:** expected calibration error 0.019, Brier score 0.015 (all test sets together). Most
   messages are easy, so the 20–80% range holds few examples. A very short message with no clear sign is capped at 85%.
-- **Disguised text:** test scams were caught 97.5% of the time as written and 97.9% after random disguise tricks.
+- **Disguised text:** test scams were caught 97.7% of the time as written and 98.5% after random disguise tricks.
   Retrained without the cleaner, the model catches 95.2% of the disguised copies.
 - **Speed and size:** about 15–25 ms per message on a laptop CPU. The model is 1.3 MB.
 

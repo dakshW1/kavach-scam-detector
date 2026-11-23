@@ -24,6 +24,27 @@ const EXAMPLES = {
   'Genuine debit alert': ['Rs.500.00 debited from A/c XX1234 on 22-11-26 to VPA swiggy@icici (UPI Ref No 412345678901). Not you? Call 18001234567 to block. -HDFC Bank', 'VM-HDFCBK-S'],
 };
 
+const when = ts => new Date(ts).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+
+// "You have checked this before": same message (fingerprint) or a very similar one (same scam, other number/link)
+function SeenBefore({ p, now }) {
+  const same = p.match === 'same';
+  const times = p.times_seen + 1;
+  return (
+    <motion.div className="seen-before" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}>
+      <span className="seen-icon">↺</span>
+      <div>
+        <b>{same ? 'You have checked this exact message before' : `This is ${Math.round(p.similarity * 100)}% similar to a message you checked before`}</b>
+        <div className="small">
+          First checked {when(p.ts)} – it was marked <b>{p.verdict}</b>{p.category ? ` (${p.category})` : ''}{p.verdict === now ? ', the same as now.' : `; now: ${now}.`}
+          {' '}{p.source === 'diary' ? `Seen ${times} time${times > 1 ? 's' : ''} in total – your diary keeps one entry and counts the repeats.` : 'Remembered for this session only (diary is off).'}
+        </div>
+        {!same && <div className="small muted" style={{ marginTop: 4 }}>Earlier message: {p.snippet}</div>}
+      </div>
+    </motion.div>
+  );
+}
+
 const RESULT_TABS = [
   { id: 'todo', label: 'What to do' }, { id: 'report', label: 'Report this scam' },
   { id: 'guide', label: 'How this scam works' }, { id: 'hood', label: 'For experts' },
@@ -117,7 +138,8 @@ export default function Check({ onChange }) {
         {rv && (
           <motion.section key={rv.text + rv.verdict} className="wrap" style={{ paddingTop: 28 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <VerdictCard r={rv} onReport={openReport} />
-            {r.saved_to_diary && <p className="small muted" style={{ margin: '10px 4px 0' }}>📔 Saved to your Scam Diary (masked: no numbers, codes or clickable links).</p>}
+            {rv.previous && <SeenBefore p={rv.previous} now={rv.verdict} />}
+            {r.saved_to_diary && !r.saved_to_diary.updated && <p className="small muted" style={{ margin: '10px 4px 0' }}>📔 Saved to your Scam Diary (masked: no numbers, codes or clickable links).</p>}
             <AnimatePresence>
               {focus != null && (
                 <motion.div className="focus-overlay" onClick={() => setFocus(null)} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
