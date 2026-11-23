@@ -13,6 +13,7 @@ It also shows **why**: the suspicious words are highlighted, and every link is i
 | Feature | What the user gets |
 |---|---|
 | **Verdict + category + confidence** | SCAM / SUSPICIOUS / SAFE, one of 5 categories (scams that don't closely match a known type are labelled "Other"), and a calibrated confidence |
+| **"This message wants you to…"** | One line inside the verdict card that lists what the message asks for: *pay ₹4,999 · WhatsApp 9123456780*, *open onlinesbi.sbi.secure-login.top/kyc*, or *nothing – it gives you a code for something you started*. Built from the rules, links, numbers and amounts already found (no language model), in English or Hindi |
 | **Highlighted message** | The original message with each warning sign marked; hover over a highlight to see the reason |
 | **Link inspector** | Fake bank domains (`sbi-kyc-update.xyz`), addresses that start with an official name (`onlinesbi.sbi.secure-login.top`), typo domains (`hdfcbnak.com`), short links, `.apk` files, raw IP addresses. Links are **never opened** |
 | **Hinglish, Hindi and disguised text** | Undoes `L0TT3RY`, `K.Y.C`, Cyrillic lookalike letters and invisible characters before checking, and shows what it read |
@@ -36,7 +37,7 @@ python -m venv .venv
 .venv\Scripts\activate            # Windows   (macOS/Linux: source .venv/bin/activate)
 pip install -r requirements.txt
 python server.py                  # the website: open http://127.0.0.1:8000
-pytest                            # 75 tests, including the privacy proof
+pytest                            # 80 tests, including the privacy proof
 ```
 
 The website is already built (`web/dist`), so Node.js is **not** needed to run it. A simpler Streamlit version of the
@@ -245,6 +246,7 @@ kavach/
   links.py            link inspector, official domain list, phone numbers
   model.py            TF-IDF + logistic regression + Platt calibration
   detector.py         analyze(message) -> Result
+  asks.py             "this message wants you to…" line
   library.py          offline Scam Library (13 families, recovery steps)
   report.py           evidence report (text + PDF)
   diary.py            opt-in local Scam Diary, dashboard stats, family alert

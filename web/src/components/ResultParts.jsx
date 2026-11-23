@@ -68,6 +68,13 @@ export function VerdictCard({ r, onReport }) {
               transition={r.verdict === 'SAFE' ? { delay: ARRIVE + 0.05, duration: 0.7, ease: EASE } : { delay: ARRIVE + 0.05, type: 'spring', stiffness: 260, damping: 20 }}
               style={{ transformOrigin: 'left center' }}>{t(v.word)}</motion.div>
             <motion.p className="sub" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: ARRIVE + 0.5, duration: 0.45, ease: EASE }}>{t(v.sub)}</motion.p>
+            {r.wants?.items?.length > 0 && (
+              <motion.div className={`wants ${r.wants.nothing ? 'nothing' : ''}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: ARRIVE + 0.6, duration: 0.45, ease: EASE }}>
+                <span className="wants-k">{t('This message wants you to')}</span>
+                {r.wants.items.map((w, i) => <span key={i} className="want">{w}</span>)}
+              </motion.div>
+            )}
             {r.safety_net && <motion.p className="small" style={{ marginTop: 10, color: 'var(--glow-warn)' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: ARRIVE + 0.6 }}>{r.safety_net}</motion.p>}
           </div>
           <motion.div className="conf" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: ARRIVE + 0.4, duration: 0.45, ease: EASE }}>

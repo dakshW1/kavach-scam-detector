@@ -28,6 +28,7 @@ from pydantic import BaseModel, Field  # noqa: E402
 from kavach import diary, intel, report  # noqa: E402
 from kavach.detector import analyze, get_model  # noqa: E402
 from kavach.explain import explain_genuine  # noqa: E402
+from kavach.asks import wants  # noqa: E402
 from kavach import hindi  # noqa: E402
 from kavach.library import FAMILIES, RECOVERY_COMMON, REPORT_ONLY  # noqa: E402
 from kavach.tricks import TRICKS, disguise  # noqa: E402
@@ -104,6 +105,7 @@ def result_json(res, saved_id=None) -> dict:
         "advice": res.advice, "recovery": RECOVERY_COMMON, "report_only": REPORT_ONLY,
         "sender_note": res.sender_note, "safety_net": res.safety_net, "ms": res.ms, "saved_to_diary": saved_id,
         "genuine": explain_genuine(res) if res.verdict != "SCAM" else None,
+        "wants": wants(res),
     }
 
 
@@ -124,6 +126,7 @@ def api_analyze(m: Msg):
     out = result_json(res, saved)
     out["previous"] = previous
     if m.lang == "hi":
+        out["wants"] = wants(res, "hi")
         hindi.translate(out)
         hindi.translate_family(out)
     return out
