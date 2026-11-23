@@ -49,7 +49,7 @@ export default function Nav({ page, go, privacy }) {
         <div ref={moreRef} style={{ position: 'relative' }}>
           <button className={`nav-link ${inExtra ? 'active' : ''}`} onClick={() => setMore(m => !m)} aria-expanded={more}>
             {inExtra && <motion.span layoutId="nav-pill" className="pill-bg" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
-            {inExtra ? extra.find(p => p.id === page).label : 'More'} ▾
+            {inExtra ? extra.find(p => p.id === page).label : 'More'} <span className={`caret ${more ? 'open' : ''}`} aria-hidden="true">▾</span>
           </button>
           <AnimatePresence>
             {more && (
@@ -64,7 +64,7 @@ export default function Nav({ page, go, privacy }) {
           </AnimatePresence>
         </div>
       </div>
-      <button className="lang-toggle" onClick={() => setLang(lang === 'hi' ? 'en' : 'hi')} aria-label={lang === 'hi' ? 'Switch to English' : 'हिंदी में देखें'}>
+      <button className="lang-toggle" aria-pressed={lang === 'hi'} onClick={() => setLang(lang === 'hi' ? 'en' : 'hi')} aria-label={lang === 'hi' ? 'Switch to English' : 'हिंदी में देखें'}>
         {lang === 'hi' ? 'English' : 'हिंदी'}
       </button>
       <ThemeToggle />

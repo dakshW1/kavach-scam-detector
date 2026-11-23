@@ -46,10 +46,16 @@ export default function ShareCard({ r }) {
   const { lang } = useLang();
   const t = useT();
   const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState(false);
   const text = shareText(r, lang);
   const flash = m => { setMsg(m); setTimeout(() => setMsg(''), 1800); };
 
   const share = async () => {
+    if (busy) return;
+    setBusy(true);
+    try { await doShare(); } finally { setBusy(false); }
+  };
+  const doShare = async () => {
     const blob = await cardBlob(text, r.verdict);
     const file = new File([blob], 'kavach-result.png', { type: 'image/png' });
     try {
@@ -62,7 +68,7 @@ export default function ShareCard({ r }) {
 
   return (
     <span className="row" style={{ gap: 8 }}>
-      <button className="btn ghost" onClick={share} title={text}>📤 {t('Share result')}</button>
+      <button className="btn ghost" onClick={share} disabled={busy}>{msg ? `✓ ${t('Share result')}` : t('Share result')}</button>
       {msg && <span className="small muted" role="status">{msg}</span>}
     </span>
   );

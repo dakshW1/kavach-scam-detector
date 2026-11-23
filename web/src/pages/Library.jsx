@@ -53,7 +53,7 @@ export default function Library() {
         {fams.map(([k, f], i) => (
           <motion.div key={k} layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.04, 0.4) }}>
             <SpotlightCard className="spot card feature" theme="light" spotlightColor="rgba(143, 203, 168, 0.28)">
-              <button onClick={() => setOpen(k)} style={{ all: 'unset', cursor: 'pointer', display: 'block' }}>
+              <button className="card-btn" onClick={() => setOpen(k)}>
                 <div className="row" style={{ justifyContent: 'space-between' }}><div className="icon">{f.icon}</div><span className="tag neutral">{f.category}</span></div>
                 <h3>{f.title}</h3>
                 <p>{f.how[0]}</p>

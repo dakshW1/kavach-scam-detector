@@ -40,6 +40,8 @@ const EXAMPLE_GROUPS = [
   ['Genuine', ['Genuine OTP', 'Genuine debit alert', 'Delivery OTP', 'Bill reminder', 'Friend (Hinglish)']],
 ];
 
+const CHECK_STEPS = ['Undoing disguise…', 'Spotting tactics…', 'Inspecting links…', 'Weighing it all…'];
+
 const when = ts => new Date(ts).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 
 // "You have checked this before": same message (fingerprint) or a very similar one (same scam, other number/link)
@@ -70,6 +72,10 @@ export default function Check({ onChange }) {
   const [channel, setChannel] = useState('SMS');
   const [r, setR] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [stage, setStage] = useState(0);        // which of the four checks the button names while checking
+  const [picked, setPicked] = useState(null);   // example chip last used
+  const [pasted, setPasted] = useState(false);
+  const [filled, setFilled] = useState(0);      // bumps to replay the "message arrived" flash
   const [err, setErr] = useState('');
   const [tab, setTab] = useState('todo');
   const [focus, setFocus] = useState(null);   // index of the sign in focus mode (null = off)
@@ -109,32 +115,45 @@ export default function Check({ onChange }) {
 
   useEffect(() => { api.metrics().then(setMetrics).catch(() => {}); }, []);
 
-  const check = async () => {
-    if (!text.trim()) { setErr(t('Paste a message first.')); return; }
-    setBusy(true); setErr('');
+  // The check itself takes ~20 ms. A short beat names the four checks so people see that work happened;
+  // the real time is shown under "For experts".
+  const check = async (txt = text, snd = sender) => {
+    if (!txt.trim()) { setErr(t('Paste a message first.')); return; }
+    setBusy(true); setErr(''); setStage(0);
+    const steps = setInterval(() => setStage(n => Math.min(n + 1, CHECK_STEPS.length - 1)), 190);
     try {
-      const res = await api.analyze(text, sender, true, lang);
+      const [res] = await Promise.all([api.analyze(txt, snd, true, lang), new Promise(ok => setTimeout(ok, 760))]);
       setR(res); setTab('todo'); setFocus(null); onChange?.();
       setTimeout(() => {
         if (resultRef.current) {
-          if (lenis) lenis.scrollTo(resultRef.current, { offset: -90, duration: 1.4 });
+          if (lenis) lenis.scrollTo(resultRef.current, { offset: -90, duration: 0.7, easing: x => 1 - Math.pow(1 - x, 4) });
           else resultRef.current.scrollIntoView({ behavior: 'smooth' });
         }
-      }, 120);
+      }, 40);
     } catch (e) { setErr(e.message); }
+    clearInterval(steps);
     setBusy(false);
   };
 
   const newCheck = () => {
-    setText(''); setSender(''); setR(null); setFocus(null); setErr('');
+    setText(''); setSender(''); setR(null); setFocus(null); setErr(''); setPicked(null);
     if (lenis) lenis.scrollTo(0, { duration: 0.8 }); else window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 300);
   };
   const paste = async () => {
-    try { const clip = await navigator.clipboard.readText(); if (clip) { setText(clip); setErr(''); } } catch { setErr('Press Ctrl+V in the box to paste.'); }
+    try {
+      const clip = await navigator.clipboard.readText();
+      if (clip) { setText(clip); setErr(''); setPicked(null); setFilled(f => f + 1); setPasted(true); setTimeout(() => setPasted(false), 1400); }
+    } catch { setErr(t('Press Ctrl+V in the box to paste.')); }
   };
 
-  const pick = name => { const [t, s] = EXAMPLES[name]; setText(t); setSender(s); setErr(''); };
+  // one click on an example fills the box and checks it
+  const pick = name => {
+    if (busy) return;
+    const [msg, snd] = EXAMPLES[name];
+    setText(msg); setSender(snd); setErr(''); setPicked(name); setFilled(f => f + 1);
+    check(msg, snd);
+  };
   const fin = metrics?.final_v2 || metrics?.final;
 
   return (
@@ -143,43 +162,47 @@ export default function Check({ onChange }) {
         <VantaNet />
         <div className="hero-inner">
           <ShinyText text={t('On-device · offline · private')} className="eyebrow" color="#8f8d88" shineColor="#ffffff" speed={2.6} />
-          <h1><BlurText key={lang} text={t('Is this message a scam?')} delay={90} animateBy="words" direction="top" className="blur-text" /></h1>
+          <h1><BlurText key={lang} text={t('Is this message a scam?')} delay={90} animateBy="words" direction="top" trigger="load" className="blur-text" /></h1>
           <p className="lede">{t('Paste any SMS or WhatsApp message.')} <span className="serif">{t('Kavach checks it on this laptop')}</span> {t('– nothing ever leaves the device.')}</p>
 
-          <motion.div className="input-card" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
-            <textarea ref={inputRef} value={text} onChange={e => setText(e.target.value)} placeholder={t('Paste the message here…')}
+          <motion.div className={`input-card ${busy ? 'scanning' : ''}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
+            <textarea key={`ta${filled}`} ref={inputRef} value={text} onChange={e => { setText(e.target.value); setPicked(null); }}
+              className={filled ? 'filled' : ''} placeholder={t('Paste the message here…')}
               onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) check(); }} aria-label="Message to check" />
             <div className="controls">
               <input className="night-input" value={sender} onChange={e => setSender(e.target.value)} placeholder={t('Sender (optional) e.g. AX-SBIINB-S or 98765 43210')} aria-label="Sender" />
               <select className="night-input" value={channel} onChange={e => setChannel(e.target.value)} aria-label="Channel">
                 {['SMS', 'WhatsApp', 'Email', 'Other'].map(c => <option key={c}>{c}</option>)}
               </select>
-              <StarBorder as="button" className="go-btn" onClick={check} color="#8fcba8" duration={5} thickness={1} radius={14} disabled={busy}>
-                {busy ? <span className="row" style={{ justifyContent: 'center' }}><span className="spinner" /> {t('Checking')}</span> : t('Check message →')}
+              <StarBorder as="button" className={`go-btn ${text.trim() ? 'ready' : ''} ${busy ? 'busy' : ''}`} onClick={() => check()} color="#8fcba8" duration={5} thickness={1} radius={14}
+                disabled={busy} aria-busy={busy}>
+                {busy ? <span className="row" style={{ justifyContent: 'center', gap: 8 }}><span className="spinner" />
+                  <AnimatePresence mode="wait"><motion.span key={stage} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.12 }}>{t(CHECK_STEPS[stage])}</motion.span></AnimatePresence></span>
+                  : t('Check message →')}
               </StarBorder>
             </div>
             {err && <p className="small" style={{ color: 'var(--glow-bad)', marginTop: 10 }}>{err}</p>}
             <div className="chips">
-              <button className="chip paste-chip" onClick={paste} title="Ctrl+V also works">📋 {t('Paste')}</button>
+              <button className={`chip paste-chip ${pasted ? 'on' : ''}`} onClick={paste} title="Ctrl+V also works">{pasted ? `✓ ${t('Pasted')}` : t('Paste')}</button>
               <span className="small muted">{t('or try an example:')}</span>
             </div>
             {EXAMPLE_GROUPS.map(([label, names]) => (
               <div className="chips chip-group" key={label}>
                 <span className="chip-group-label">{t(label)}</span>
-                {names.map(n => <button key={n} className="chip" onClick={() => pick(n)}>{n}</button>)}
+                {names.map(n => <button key={n} className={`chip ${picked === n ? 'on' : ''}`} aria-pressed={picked === n} onClick={() => pick(n)}>{n}</button>)}
               </div>
             ))}
           </motion.div>
         </div>
       </section>
 
+      <div className="sr-only" role="status" aria-live="polite">
+        {rv ? `${t(rv.verdict === 'SCAM' ? 'Scam' : rv.verdict === 'SUSPICIOUS' ? 'Be careful' : 'Looks safe')}. ${rv.confidence_band}. ${rv.family_info && rv.verdict !== 'SAFE' ? rv.family_info.title : ''}` : ''}
+      </div>
       <div ref={resultRef} />
       <AnimatePresence mode="wait">
         {rv && (
           <motion.section key={rv.text + rv.verdict} className="wrap" style={{ paddingTop: 28 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="sr-only" role="status" aria-live="polite">
-              {`${t(rv.verdict === 'SCAM' ? 'Scam' : rv.verdict === 'SUSPICIOUS' ? 'Be careful' : 'Looks safe')}. ${rv.confidence_band}. ${rv.family_info && rv.verdict !== 'SAFE' ? rv.family_info.title : ''}`}
-            </div>
             <VerdictCard r={rv} onReport={openReport} />
             <div className="row result-actions">
               <button className="btn ghost" onClick={newCheck}>↺ {t('Check another message')}</button>

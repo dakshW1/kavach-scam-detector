@@ -9,7 +9,7 @@ const HI = {
   '– nothing ever leaves the device.': '– कुछ भी बाहर नहीं जाता।',
   'Paste the message here…': 'मैसेज यहाँ पेस्ट करें…',
   'Sender (optional) e.g. AX-SBIINB-S or 98765 43210': 'भेजने वाला (वैकल्पिक) जैसे AX-SBIINB-S या 98765 43210',
-  'Check message →': 'मैसेज जाँचें →', Checking: 'जाँच हो रही है', 'Try:': 'आज़माएँ:', Paste: 'पेस्ट करें',
+  'Check message →': 'मैसेज जाँचें →', Checking: 'जाँच हो रही है', 'Try:': 'आज़माएँ:', Paste: 'पेस्ट करें', Pasted: 'पेस्ट हुआ', 'Undoing disguise…': 'छिपावट हटा रहे हैं…', 'Spotting tactics…': 'चालें पहचान रहे हैं…', 'Inspecting links…': 'लिंक जाँच रहे हैं…', 'Weighing it all…': 'सब तौल रहे हैं…',
   'Paste a message first.': 'पहले मैसेज डालें।',
   'or try an example:': 'या कोई उदाहरण आज़माएँ:', 'Obvious scams': 'साफ़ धोखे', 'Subtle scams': 'छिपे हुए धोखे', Genuine: 'असली मैसेज',
   Scam: 'धोखा', 'Be careful': 'सावधान', 'Looks safe': 'सुरक्षित लगता है',
