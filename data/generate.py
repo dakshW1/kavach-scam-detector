@@ -492,16 +492,15 @@ def build(per_scam=14, per_safe=12, obf_rate=0.3):
     for i, txt in ham[:2500]:
         rows.append({"text": txt, "label": "SAFE", "category": "", "group": f"uci:{i}", "source": "uci", "kind": "personal"})
 
-    # split by group: 25% of templates (and 20% of UCI messages) go to test
-    groups = sorted({r["group"] for r in rows})
-    test_groups = set()
-    by_prefix: dict[str, list[str]] = {}
-    for g in groups:
-        by_prefix.setdefault(g.rsplit(":", 1)[0], []).append(g)
-    for prefix, gs in by_prefix.items():
-        rng.shuffle(gs)
-        frac = 0.2 if prefix == "uci" else 0.25
-        test_groups.update(gs[: max(1, round(len(gs) * frac))])
+    # split by group: about 25% of templates (and 20% of UCI messages) go to test. The choice depends only on a
+    # hash of the group id, so adding new templates later never moves an existing template between train and test.
+    import hashlib
+
+    def in_test(group: str) -> bool:
+        frac = 0.2 if group.startswith("uci:") else 0.25
+        return int(hashlib.md5(group.encode()).hexdigest()[:8], 16) / 0xFFFFFFFF < frac
+
+    test_groups = {r["group"] for r in rows if in_test(r["group"])}
     for r in rows:
         r["split"] = "test" if r["group"] in test_groups else "train"
         r.setdefault("kind", "scam" if r["label"] == "SCAM" else "personal")

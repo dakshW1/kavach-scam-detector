@@ -196,3 +196,67 @@ SCAM_V3 = {
         "Free ration card renewal. Fill the form with your Aadhaar and bank details: https://forms.gle/{code}",
     ],
 }
+
+
+# ---- fourth batch (round-2 testers: shopkeeper, student, bank helpdesk, jury, accessibility) ----
+# Gaps: "scan QR / enter PIN / approve request to receive money" in Hinglish and Hindi, student fee scams
+# (exam, hall ticket, scholarship), "buy a product first" brand-collab scams, fake e-mandate / cancel-link SMS;
+# and genuine college notices, interview invites that say "no fee", customer UPI credits, supplier payment
+# reminders, order updates with short official links, postal PIN codes.
+SCAM_V3["Other"] += [
+    "Bhai main aapka maal online order karna chahta hu. Advance bhejne ke liye QR scan karke PIN daal do, amount turant aa jayega.",
+    "Sir CRPF se hu, aapki dukaan se 50 packet chahiye. PhonePe pe request bheja hai, approve kar do payment aa jayega.",
+    "Aapke number pe {amount} galti se chale gaye. Maine collect request bheji hai, use accept karke wapas kar do please.",
+    "स्कैन करें और यूपीआई पिन डालें, आपको {amount} कैशबैक मिलेगा।",
+    "Customer care: refund paane ke liye QR code scan kijiye aur apna UPI PIN enter kijiye.",
+    "Dear user, Rs 1 has been debited for your e-mandate registration. If you did not authorise it, click {link} to cancel immediately.",
+    "Your autopay of {amount} for Netflix will be processed tonight. To stop it, log in at {link} and confirm your card.",
+    "GST notice: aapki dukaan ka GST number band ho jayega. Penalty {fee} turant is link par bharo {link_refund}",
+]
+SCAM_V3["Job/Investment"] += [
+    "Hi! We loved your profile and want you as our brand ambassador. Buy any product from our store first, the amount will be refunded with 40% commission.",
+    "Paid collab offer: order our starter kit for {small} first, then post 3 reels and earn {amount} per week.",
+    "Internship confirmed at a reputed MNC. Pay {fee} as training and certificate fee to receive your offer letter.",
+]
+SCAM_V3["Other"] += [
+    "University notice: your exam form is incomplete. Pay late fee {small} at {link} before midnight or your hall ticket will be blocked.",
+    "Scholarship of {amount2} approved under the state scheme. Pay {small} processing fee and submit bank details at {link_refund}.",
+    "College portal alert: your semester registration will be cancelled. Pay {fee} now at {short} to avoid detention.",
+]
+SAFE_V3["college"] = [
+    "Semester exam forms are open on the university portal till {date}. Late fee applies after the deadline. -Examination Cell",
+    "Hall tickets for the end-semester exams can be downloaded from the student login on the official college website.",
+    "Placement drive: {merchant} is visiting campus on {date}. Eligible students should register on the placement portal.",
+    "Scholarship applications are open on the National Scholarship Portal (scholarships.gov.in). No fee is charged.",
+    "Reminder: library books due by {date}. Return them at the counter to avoid fines.",
+]
+SAFE_V3["interview_invite"] = [
+    "Dear {name}, you are invited for an interview at our {city} office on {date} at 11 AM. Please bring your ID. No fee is charged at any stage.",
+    "Thank you for applying to {merchant}. Your interview is scheduled for {date}. We never ask candidates for money.",
+    "Congratulations, you have cleared the first round. HR will email the next steps. Our hiring process is free of cost.",
+]
+SAFE_V3["merchant_credit"] = [
+    "Rs {small_n} received from {name_up} via UPI. Ref {ref}. Check your PhonePe Business app for details.",
+    "You received {amount} on Paytm for Business from customer {name}. Settlement will reach your bank tomorrow.",
+    "Payment of {amount} received on your shop QR. UPI Ref {ref}. -BharatPe",
+    "आपको {amount} प्राप्त हुए हैं। यूपीआई संदर्भ {ref}।",
+]
+SAFE_V3["supplier"] = [
+    "{name} ji, last month ka bill {amount} baaki hai. Jab ho sake shop ke account me bhej dena. Dhanyavaad – {name_up} Traders",
+    "Reminder from {name_up} Wholesale: invoice of {amount2} is due on {date}. Pay through the usual bank account.",
+    "Maal kal subah tak pahunch jayega, payment delivery ke baad kar dena.",
+]
+SAFE_V3["autopay_genuine"] = [
+    "Your e-mandate for {amount} monthly SIP has been registered. To manage mandates, use the {bank} mobile app.",
+    "AutoPay of {small} for Netflix scheduled on {date} from your card XX{otp4}. Manage it in the official app. -{bank}",
+    "Mandate cancelled successfully for {merchant} as requested by you on {date}. -{bank}",
+]
+SAFE_V3["order_short_link"] = [
+    "Your Flipkart order with 2 items has been packed and will be shipped soon. Track: {fklink}",
+    "Out for delivery: your {merchant} order will arrive today between 2 and 6 PM.",
+    "Your order has been delivered. Rate your experience in the app.",
+]
+SAFE_V3["pin_code"] = [
+    "Please share your address with PIN code so we can send the wedding card.",
+    "Delivery is not available for PIN code 560034 yet. We will notify you when it is.",
+]

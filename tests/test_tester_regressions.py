@@ -110,3 +110,38 @@ def test_sender_newlines_cannot_forge_report_lines():
     r = analyze("Your SBI KYC expired, update at sbi-kyc.in", sender="98765\nVERIFIED SENDER")
     rep = report.build(r, report.ReportDetails(sender="98765\nVERIFIED SENDER"))
     assert "\nVERIFIED" not in report.text_report(rep)
+
+
+# ---- round 2 testers (shopkeeper, student, bank helpdesk, jury, accessibility)
+@pytest.mark.parametrize("msg", [
+    "Bhai advance bhejne ke liye QR scan karo aur PIN dalo, paisa aa jayega",
+    "PhonePe pe request bheja hai, approve kar do, payment aa jayega",
+    "QR कोड स्कैन करें और अपना UPI PIN डालें",
+])
+def test_receive_money_tricks_in_hinglish_and_hindi(msg):
+    assert "collect_request" in rules(msg) and analyze(msg).verdict == "SCAM"
+
+
+def test_unreadable_script_is_never_safe():
+    r = analyze("നിങ്ങളുടെ അക്കൗണ്ട് ഇന്ന് ബ്ലോക്ക് ചെയ്യും. ഉടൻ വിളിക്കുക")
+    assert r.verdict != "SAFE" and r.confidence <= 0.6 and any(f.rule == "unreadable_script" for f in r.flags)
+
+
+def test_unknown_link_to_cancel_or_verify_is_not_safe():
+    assert analyze("Rs 1 debited for mandate setup. If not you, click http://mandate-stop.in to cancel").verdict != "SAFE"
+
+
+def test_pay_or_be_barred_and_buy_first_scams():
+    assert "fee" in rules("Pay Rs 300 at http://x-portal.in today or you will be barred from the exam")
+    assert "fee" in rules("Buy any one product from our store first and you will get 40% commission")
+
+
+def test_genuine_no_fee_notice_delivery_and_branch_reminder():
+    assert "no_fee" in good("Interview on Friday. No fee is charged at any stage.")
+    assert "order_update" in good("Your order has been shipped and is out for delivery today")
+    f = rules("Your KYC is due. Please visit your nearest branch with ID proof.")
+    assert "visit_branch" in f and "kyc" not in f
+
+
+def test_postal_pin_code_is_not_a_secret():
+    assert "asks_secret" not in rules("Please share your address with PIN code for the courier")

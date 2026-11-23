@@ -1,153 +1,153 @@
 {
   "model": {
-    "size_mb": 1.345548,
+    "size_mb": 1.395077,
     "t_safe": 0.35,
     "t_scam": 0.7,
-    "n_train": 4852,
-    "n_features": 39560
+    "n_train": 5068,
+    "n_features": 40282
   },
   "test": {
-    "n": 1423,
-    "n_scam": 571,
-    "n_safe": 852,
-    "accuracy": 0.9754040758959944,
-    "precision": 0.9981412639405205,
-    "recall": 0.9404553415061296,
-    "f1": 0.9684400360685302,
-    "caught_scam_or_suspicious": 0.978984238178634,
-    "safe_marked_scam": 0.0011737089201877935,
-    "safe_marked_suspicious": 0.015258215962441314,
+    "n": 1551,
+    "n_scam": 617,
+    "n_safe": 934,
+    "accuracy": 0.9935525467440361,
+    "precision": 1.0,
+    "recall": 0.9837925445705025,
+    "f1": 0.9918300653594772,
+    "caught_scam_or_suspicious": 0.9886547811993517,
+    "safe_marked_scam": 0.0,
+    "safe_marked_suspicious": 0.014989293361884369,
     "verdicts": {
       "scam": {
-        "SCAM": 537,
-        "SUSPICIOUS": 22,
-        "SAFE": 12
+        "SCAM": 607,
+        "SUSPICIOUS": 3,
+        "SAFE": 7
       },
       "safe": {
-        "SCAM": 1,
-        "SUSPICIOUS": 13,
-        "SAFE": 838
+        "SCAM": 0,
+        "SUSPICIOUS": 14,
+        "SAFE": 920
       }
     },
     "false_alarms_by_kind": {
       "bank_alert": {
-        "n": 48,
+        "n": 55,
         "marked_scam": 0.0,
         "marked_suspicious": 0.0
       },
       "otp": {
-        "n": 24,
+        "n": 12,
         "marked_scam": 0.0,
         "marked_suspicious": 0.0
       },
       "delivery": {
-        "n": 37,
+        "n": 20,
         "marked_scam": 0.0,
         "marked_suspicious": 0.0
       }
     },
-    "category_accuracy": 0.9660107334525939,
-    "category_macro_f1": 0.9695684141627524,
+    "category_accuracy": 0.8901639344262295,
+    "category_macro_f1": 0.9021259662769097,
     "category_confusion": {
       "KYC/Bank": {
-        "KYC/Bank": 113,
-        "Lottery/Prize": 0,
+        "KYC/Bank": 91,
+        "Lottery/Prize": 14,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 14
+        "Other": 20
       },
       "Lottery/Prize": {
         "KYC/Bank": 0,
-        "Lottery/Prize": 137,
+        "Lottery/Prize": 124,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 0
+        "Other": 1
       },
       "Loan/Credit": {
         "KYC/Bank": 0,
-        "Lottery/Prize": 0,
-        "Loan/Credit": 56,
+        "Lottery/Prize": 2,
+        "Loan/Credit": 70,
         "Job/Investment": 0,
-        "Other": 3
+        "Other": 12
       },
       "Job/Investment": {
         "KYC/Bank": 0,
-        "Lottery/Prize": 1,
+        "Lottery/Prize": 0,
         "Loan/Credit": 0,
-        "Job/Investment": 75,
+        "Job/Investment": 56,
         "Other": 0
       },
       "Other": {
-        "KYC/Bank": 1,
+        "KYC/Bank": 18,
         "Lottery/Prize": 0,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 159
+        "Other": 202
       }
     },
-    "ms_per_message": 17.978913422346455,
+    "ms_per_message": 19.53266266924093,
     "calibration": {
       "bins": [
         {
           "lo": 0.0,
           "hi": 0.2,
-          "n": 845,
-          "mean_p": 0.017277573832489092,
-          "frac_scam": 0.01301775147928994
+          "n": 905,
+          "mean_p": 0.009160890053340882,
+          "frac_scam": 0.0055248618784530384
         },
         {
           "lo": 0.2,
           "hi": 0.4,
-          "n": 17,
-          "mean_p": 0.33291336891450846,
-          "frac_scam": 0.17647058823529413
+          "n": 32,
+          "mean_p": 0.28847070211409775,
+          "frac_scam": 0.0625
         },
         {
           "lo": 0.4,
           "hi": 0.6000000000000001,
-          "n": 20,
-          "mean_p": 0.5136671740470466,
-          "frac_scam": 0.85
+          "n": 5,
+          "mean_p": 0.5153552063572204,
+          "frac_scam": 0.2
         },
         {
           "lo": 0.6000000000000001,
           "hi": 0.8,
-          "n": 21,
-          "mean_p": 0.7275644678519996,
-          "frac_scam": 0.9523809523809523
+          "n": 9,
+          "mean_p": 0.7356936849093191,
+          "frac_scam": 1.0
         },
         {
           "lo": 0.8,
           "hi": 1.0,
-          "n": 520,
-          "mean_p": 0.9818286741733149,
+          "n": 600,
+          "mean_p": 0.9890657372769567,
           "frac_scam": 1.0
         }
       ],
-      "ece": 0.01908360455660103,
-      "brier": 0.014371407132931517
+      "ece": 0.01356399643285161,
+      "brier": 0.006931629015635779
     }
   },
   "challenge": {
     "n": 101,
     "n_scam": 53,
     "n_safe": 48,
-    "accuracy": 0.9603960396039604,
-    "precision": 0.9803921568627451,
-    "recall": 0.9433962264150944,
-    "f1": 0.9615384615384616,
+    "accuracy": 0.9801980198019802,
+    "precision": 0.9636363636363636,
+    "recall": 1.0,
+    "f1": 0.9814814814814815,
     "caught_scam_or_suspicious": 1.0,
-    "safe_marked_scam": 0.020833333333333332,
-    "safe_marked_suspicious": 0.041666666666666664,
+    "safe_marked_scam": 0.041666666666666664,
+    "safe_marked_suspicious": 0.020833333333333332,
     "verdicts": {
       "scam": {
-        "SCAM": 50,
-        "SUSPICIOUS": 3,
+        "SCAM": 53,
+        "SUSPICIOUS": 0,
         "SAFE": 0
       },
       "safe": {
-        "SCAM": 1,
-        "SUSPICIOUS": 2,
+        "SCAM": 2,
+        "SUSPICIOUS": 1,
         "SAFE": 45
       }
     },
@@ -169,14 +169,14 @@
       }
     },
     "category_accuracy": 0.8679245283018868,
-    "category_macro_f1": 0.8780633702756464,
+    "category_macro_f1": 0.8779444444444444,
     "category_confusion": {
       "KYC/Bank": {
-        "KYC/Bank": 10,
+        "KYC/Bank": 11,
         "Lottery/Prize": 0,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 2
+        "Other": 1
       },
       "Lottery/Prize": {
         "KYC/Bank": 0,
@@ -200,11 +200,11 @@
         "Other": 1
       },
       "Other": {
-        "KYC/Bank": 1,
+        "KYC/Bank": 2,
         "Lottery/Prize": 0,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 14
+        "Other": 13
       }
     },
     "caught_by_kind": {
@@ -225,60 +225,44 @@
         "caught": 1.0
       }
     },
-    "ms_per_message": 18.57878910887659,
+    "ms_per_message": 20.334836633704224,
     "calibration": {
       "bins": [
         {
           "lo": 0.0,
           "hi": 0.2,
-          "n": 44,
-          "mean_p": 0.028283234599412253,
+          "n": 45,
+          "mean_p": 0.02436853331489045,
           "frac_scam": 0.0
         },
         {
           "lo": 0.2,
           "hi": 0.4,
-          "n": 3,
-          "mean_p": 0.30482139730596575,
+          "n": 1,
+          "mean_p": 0.25845140245617093,
           "frac_scam": 0.0
         },
         {
           "lo": 0.6000000000000001,
           "hi": 0.8,
-          "n": 5,
-          "mean_p": 0.7079581605754669,
-          "frac_scam": 1.0
+          "n": 2,
+          "mean_p": 0.7541389472391048,
+          "frac_scam": 0.5
         },
         {
           "lo": 0.8,
           "hi": 1.0,
-          "n": 49,
-          "mean_p": 0.9834732241466451,
-          "frac_scam": 0.9795918367346939
+          "n": 53,
+          "mean_p": 0.9898457813748678,
+          "frac_scam": 0.9811320754716981
         }
       ],
-      "ece": 0.0377160761841615,
-      "brier": 0.018516805563428804
+      "ece": 0.02302118523735092,
+      "brier": 0.017900949132421316
     },
     "mistakes": [
       {
         "text": "Y0ur S.B.I a/c is susp3nded. Reactivate n0w: tinyurl.com/sbi-react",
-        "label": "SCAM",
-        "category": "KYC/Bank",
-        "verdict": "SCAM",
-        "p_scam": 0.996,
-        "pred_category": "Other"
-      },
-      {
-        "text": "Dеаr custоmеr, yоur Ваnk оf Ваrоdа КYС hаs ехpirеd. Updаtе аt bоb-kус.соm",
-        "label": "SCAM",
-        "category": "KYC/Bank",
-        "verdict": "SUSPICIOUS",
-        "p_scam": 0.638,
-        "pred_category": "KYC/Bank"
-      },
-      {
-        "text": "Card blocked due to suspicious activity. To unblock, install the 'Bank Support' APK from sbisupport.top/app.apk",
         "label": "SCAM",
         "category": "KYC/Bank",
         "verdict": "SCAM",
@@ -290,7 +274,7 @@
         "label": "SCAM",
         "category": "Lottery/Prize",
         "verdict": "SCAM",
-        "p_scam": 0.788,
+        "p_scam": 0.897,
         "pred_category": "Other"
       },
       {
@@ -298,7 +282,7 @@
         "label": "SCAM",
         "category": "Loan/Credit",
         "verdict": "SCAM",
-        "p_scam": 0.997,
+        "p_scam": 1.0,
         "pred_category": "Other"
       },
       {
@@ -314,39 +298,31 @@
         "label": "SCAM",
         "category": "Job/Investment",
         "verdict": "SCAM",
-        "p_scam": 0.994,
+        "p_scam": 0.999,
         "pred_category": "Other"
       },
       {
-        "text": "Crypto me 1 lakh lagao, 1 mahine me 3 lakh pakka. Mere group me aa jao",
-        "label": "SCAM",
-        "category": "Job/Investment",
-        "verdict": "SUSPICIOUS",
-        "p_scam": 0.689,
-        "pred_category": "Job/Investment"
-      },
-      {
-        "text": "I paid you 5000 by mistake on Google Pay. Please accept the request I just sent to return it.",
+        "text": "Your WhatsApp account will be deleted. To keep it, send the 6-digit code you received by SMS.",
         "label": "SCAM",
         "category": "Other",
-        "verdict": "SUSPICIOUS",
-        "p_scam": 0.656,
-        "pred_category": "Other"
+        "verdict": "SCAM",
+        "p_scam": 1.0,
+        "pred_category": "KYC/Bank"
       },
       {
         "text": "Your FASTag KYC expired. Update now or vehicle blacklisted: fastag-kyc.online",
         "label": "SCAM",
         "category": "Other",
         "verdict": "SCAM",
-        "p_scam": 0.981,
+        "p_scam": 0.999,
         "pred_category": "KYC/Bank"
       },
       {
         "text": "Bhai lottery ticket wala joke dekha tune? Group pe bheja hai, hasi nahi ruk rahi",
         "label": "SAFE",
         "category": "",
-        "verdict": "SUSPICIOUS",
-        "p_scam": 0.392,
+        "verdict": "SCAM",
+        "p_scam": 0.737,
         "pred_category": "Lottery/Prize"
       },
       {
@@ -354,7 +330,7 @@
         "label": "SAFE",
         "category": "",
         "verdict": "SCAM",
-        "p_scam": 0.996,
+        "p_scam": 1.0,
         "pred_category": "Other"
       },
       {
@@ -362,7 +338,7 @@
         "label": "SAFE",
         "category": "",
         "verdict": "SUSPICIOUS",
-        "p_scam": 0.12,
+        "p_scam": 0.258,
         "pred_category": "Other"
       }
     ]
@@ -371,23 +347,23 @@
     "n": 72,
     "n_scam": 37,
     "n_safe": 35,
-    "accuracy": 0.9722222222222222,
-    "precision": 0.972972972972973,
-    "recall": 0.972972972972973,
-    "f1": 0.972972972972973,
+    "accuracy": 0.9861111111111112,
+    "precision": 0.9736842105263158,
+    "recall": 1.0,
+    "f1": 0.9866666666666666,
     "caught_scam_or_suspicious": 1.0,
     "safe_marked_scam": 0.02857142857142857,
-    "safe_marked_suspicious": 0.02857142857142857,
+    "safe_marked_suspicious": 0.05714285714285714,
     "verdicts": {
       "scam": {
-        "SCAM": 36,
-        "SUSPICIOUS": 1,
+        "SCAM": 37,
+        "SUSPICIOUS": 0,
         "SAFE": 0
       },
       "safe": {
         "SCAM": 1,
-        "SUSPICIOUS": 1,
-        "SAFE": 33
+        "SUSPICIOUS": 2,
+        "SAFE": 32
       }
     },
     "false_alarms_by_kind": {
@@ -407,15 +383,15 @@
         "marked_suspicious": 0.0
       }
     },
-    "category_accuracy": 0.918918918918919,
-    "category_macro_f1": 0.9205797101449276,
+    "category_accuracy": 0.972972972972973,
+    "category_macro_f1": 0.9777089783281735,
     "category_confusion": {
       "KYC/Bank": {
-        "KYC/Bank": 7,
+        "KYC/Bank": 8,
         "Lottery/Prize": 0,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 1
+        "Other": 0
       },
       "Lottery/Prize": {
         "KYC/Bank": 0,
@@ -427,9 +403,9 @@
       "Loan/Credit": {
         "KYC/Bank": 0,
         "Lottery/Prize": 0,
-        "Loan/Credit": 4,
+        "Loan/Credit": 6,
         "Job/Investment": 0,
-        "Other": 2
+        "Other": 0
       },
       "Job/Investment": {
         "KYC/Bank": 0,
@@ -439,11 +415,11 @@
         "Other": 0
       },
       "Other": {
-        "KYC/Bank": 0,
+        "KYC/Bank": 1,
         "Lottery/Prize": 0,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 10
+        "Other": 9
       }
     },
     "caught_by_kind": {
@@ -464,79 +440,49 @@
         "caught": 1.0
       }
     },
-    "ms_per_message": 18.4714680556984,
+    "ms_per_message": 20.520249999915702,
     "calibration": {
       "bins": [
         {
           "lo": 0.0,
           "hi": 0.2,
-          "n": 33,
-          "mean_p": 0.031432413964905793,
+          "n": 32,
+          "mean_p": 0.013785939476482455,
           "frac_scam": 0.0
-        },
-        {
-          "lo": 0.2,
-          "hi": 0.4,
-          "n": 1,
-          "mean_p": 0.37759540802974784,
-          "frac_scam": 0.0
-        },
-        {
-          "lo": 0.4,
-          "hi": 0.6000000000000001,
-          "n": 1,
-          "mean_p": 0.546396295598003,
-          "frac_scam": 1.0
         },
         {
           "lo": 0.6000000000000001,
           "hi": 0.8,
-          "n": 1,
-          "mean_p": 0.7452156074232005,
+          "n": 3,
+          "mean_p": 0.6739316370722171,
           "frac_scam": 0.0
         },
         {
           "lo": 0.8,
           "hi": 1.0,
-          "n": 36,
-          "mean_p": 0.9855531783199876,
+          "n": 37,
+          "mean_p": 0.9978810927768346,
           "frac_scam": 1.0
         }
       ],
-      "ece": 0.04352458279412895,
-      "brier": 0.014324314220973158
+      "ece": 0.03529645196835015,
+      "brier": 0.019432095100346037
     },
     "mistakes": [
       {
-        "text": "Airtel KYC team: your number will be disconnected in 3 hours. Install 'KYC Helper' app from airtel-kyc.app to continue.",
+        "text": "Hey, I accidentally sent my WhatsApp verification code to your number. Can you forward it to me please?",
         "label": "SCAM",
-        "category": "KYC/Bank",
+        "category": "Other",
         "verdict": "SCAM",
-        "p_scam": 1.0,
-        "pred_category": "Other"
-      },
-      {
-        "text": "Hi! Get cash up to 5 lakh in your bank in 10 minutes, no salary slip needed. Download: cashnow-loan.apk",
-        "label": "SCAM",
-        "category": "Loan/Credit",
-        "verdict": "SCAM",
-        "p_scam": 1.0,
-        "pred_category": "Other"
-      },
-      {
-        "text": "Last warning: your loan repayment is late. Pay now or we will call your relatives and post your photo online.",
-        "label": "SCAM",
-        "category": "Loan/Credit",
-        "verdict": "SUSPICIOUS",
-        "p_scam": 0.546,
-        "pred_category": "Other"
+        "p_scam": 0.998,
+        "pred_category": "KYC/Bank"
       },
       {
         "text": "Your fixed deposit of Rs 1,00,000 has been renewed for 12 months at 7.1%. Details in the YONO app.",
         "label": "SAFE",
         "category": "",
         "verdict": "SUSPICIOUS",
-        "p_scam": 0.378,
+        "p_scam": 0.617,
         "pred_category": "Other"
       },
       {
@@ -544,8 +490,16 @@
         "label": "SAFE",
         "category": "",
         "verdict": "SCAM",
-        "p_scam": 0.745,
+        "p_scam": 0.786,
         "pred_category": "KYC/Bank"
+      },
+      {
+        "text": "We won the inter-college cricket match today!! 🏏",
+        "label": "SAFE",
+        "category": "",
+        "verdict": "SUSPICIOUS",
+        "p_scam": 0.618,
+        "pred_category": "Lottery/Prize"
       }
     ]
   },
@@ -553,13 +507,13 @@
     "n": 68,
     "n_scam": 35,
     "n_safe": 33,
-    "accuracy": 0.9852941176470589,
-    "precision": 1.0,
+    "accuracy": 0.9558823529411765,
+    "precision": 0.9444444444444444,
     "recall": 0.9714285714285714,
-    "f1": 0.9855072463768115,
+    "f1": 0.9577464788732395,
     "caught_scam_or_suspicious": 0.9714285714285714,
-    "safe_marked_scam": 0.0,
-    "safe_marked_suspicious": 0.09090909090909091,
+    "safe_marked_scam": 0.06060606060606061,
+    "safe_marked_suspicious": 0.0,
     "verdicts": {
       "scam": {
         "SCAM": 34,
@@ -567,9 +521,9 @@
         "SAFE": 1
       },
       "safe": {
-        "SCAM": 0,
-        "SUSPICIOUS": 3,
-        "SAFE": 30
+        "SCAM": 2,
+        "SUSPICIOUS": 0,
+        "SAFE": 31
       }
     },
     "false_alarms_by_kind": {
@@ -590,14 +544,14 @@
       }
     },
     "category_accuracy": 0.9705882352941176,
-    "category_macro_f1": 0.985070785070785,
+    "category_macro_f1": 0.9843454790823211,
     "category_confusion": {
       "KYC/Bank": {
-        "KYC/Bank": 10,
+        "KYC/Bank": 9,
         "Lottery/Prize": 0,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 0
+        "Other": 1
       },
       "Lottery/Prize": {
         "KYC/Bank": 0,
@@ -621,11 +575,11 @@
         "Other": 0
       },
       "Other": {
-        "KYC/Bank": 1,
+        "KYC/Bank": 0,
         "Lottery/Prize": 0,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 18
+        "Other": 19
       }
     },
     "caught_by_kind": {
@@ -638,88 +592,66 @@
         "caught": 1.0
       }
     },
-    "ms_per_message": 21.979950000112535,
+    "ms_per_message": 19.817347058800376,
     "calibration": {
       "bins": [
         {
           "lo": 0.0,
           "hi": 0.2,
           "n": 31,
-          "mean_p": 0.025608553826989906,
+          "mean_p": 0.015141075233985599,
           "frac_scam": 0.03225806451612903
         },
         {
           "lo": 0.2,
           "hi": 0.4,
           "n": 1,
-          "mean_p": 0.35203846434912567,
+          "mean_p": 0.24501557387240816,
           "frac_scam": 0.0
-        },
-        {
-          "lo": 0.4,
-          "hi": 0.6000000000000001,
-          "n": 2,
-          "mean_p": 0.5260153527624634,
-          "frac_scam": 0.0
-        },
-        {
-          "lo": 0.6000000000000001,
-          "hi": 0.8,
-          "n": 2,
-          "mean_p": 0.7878024277347744,
-          "frac_scam": 1.0
         },
         {
           "lo": 0.8,
           "hi": 1.0,
-          "n": 32,
-          "mean_p": 0.9799327002576435,
-          "frac_scam": 1.0
+          "n": 36,
+          "mean_p": 0.9836290835421908,
+          "frac_scam": 0.9444444444444444
         }
       ],
-      "ece": 0.039364010845929796,
-      "brier": 0.022455850277087366
+      "ece": 0.03215131248731948,
+      "brier": 0.03434783984381486
     },
     "mistakes": [
-      {
-        "text": "Electricity board notice: pay pending dues at https://bescom-dues.web.app before 9 PM to keep supply.",
-        "label": "SCAM",
-        "category": "Other",
-        "verdict": "SCAM",
-        "p_scam": 0.998,
-        "pred_category": "KYC/Bank"
-      },
       {
         "text": "To complete your card upgrade our executive needs the number that came on your mobile. Kindly read it out when he calls.",
         "label": "SCAM",
         "category": "KYC/Bank",
         "verdict": "SAFE",
-        "p_scam": 0.178,
+        "p_scam": 0.08,
         "pred_category": null
+      },
+      {
+        "text": "Treasury office se bol rahe hain. Pension renewal ke liye apna bank account number aur OTP is number par bhejiye 9123498765",
+        "label": "SCAM",
+        "category": "KYC/Bank",
+        "verdict": "SCAM",
+        "p_scam": 1.0,
+        "pred_category": "Other"
       },
       {
         "text": "Congrats to all winners of the inter-school quiz! Prizes will be distributed at the assembly on Monday.",
         "label": "SAFE",
         "category": "",
-        "verdict": "SUSPICIOUS",
-        "p_scam": 0.352,
+        "verdict": "SCAM",
+        "p_scam": 0.838,
         "pred_category": "Lottery/Prize"
       },
       {
         "text": "Congratulations! You have won the Best Paper award at the student conference. Certificate will be emailed.",
         "label": "SAFE",
         "category": "",
-        "verdict": "SUSPICIOUS",
-        "p_scam": 0.569,
+        "verdict": "SCAM",
+        "p_scam": 0.825,
         "pred_category": "Lottery/Prize"
-      },
-      {
-        "text": "Bhai bill split kar dete hai, mera share 450 hai, abhi bhej deta hu",
-        "label": "SAFE",
-        "category": "",
-        "verdict": "SUSPICIOUS",
-        "p_scam": 0.483,
-        "pred_category": "Other"
       }
     ]
   },
@@ -727,17 +659,17 @@
     "n": 137,
     "n_scam": 83,
     "n_safe": 54,
-    "accuracy": 0.9781021897810219,
-    "precision": 0.9761904761904762,
-    "recall": 0.9879518072289156,
-    "f1": 0.9820359281437125,
+    "accuracy": 0.9854014598540146,
+    "precision": 0.9764705882352941,
+    "recall": 1.0,
+    "f1": 0.988095238095238,
     "caught_scam_or_suspicious": 1.0,
     "safe_marked_scam": 0.037037037037037035,
     "safe_marked_suspicious": 0.0,
     "verdicts": {
       "scam": {
-        "SCAM": 82,
-        "SUSPICIOUS": 1,
+        "SCAM": 83,
+        "SUSPICIOUS": 0,
         "SAFE": 0
       },
       "safe": {
@@ -763,15 +695,15 @@
         "marked_suspicious": 0.0
       }
     },
-    "category_accuracy": 0.9397590361445783,
-    "category_macro_f1": 0.95941976646202,
+    "category_accuracy": 0.9036144578313253,
+    "category_macro_f1": 0.9548489666136725,
     "category_confusion": {
       "KYC/Bank": {
-        "KYC/Bank": 34,
+        "KYC/Bank": 30,
         "Lottery/Prize": 0,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 2
+        "Other": 6
       },
       "Lottery/Prize": {
         "KYC/Bank": 0,
@@ -791,8 +723,8 @@
         "KYC/Bank": 0,
         "Lottery/Prize": 0,
         "Loan/Credit": 0,
-        "Job/Investment": 6,
-        "Other": 1
+        "Job/Investment": 7,
+        "Other": 0
       },
       "Other": {
         "KYC/Bank": 2,
@@ -802,49 +734,36 @@
         "Other": 33
       }
     },
-    "ms_per_message": 23.42318175188487,
+    "ms_per_message": 20.84462992695286,
     "calibration": {
       "bins": [
         {
           "lo": 0.0,
           "hi": 0.2,
-          "n": 51,
-          "mean_p": 0.02311390727419241,
+          "n": 52,
+          "mean_p": 0.019084642186567764,
           "frac_scam": 0.0
-        },
-        {
-          "lo": 0.2,
-          "hi": 0.4,
-          "n": 1,
-          "mean_p": 0.20857759274052268,
-          "frac_scam": 0.0
-        },
-        {
-          "lo": 0.4,
-          "hi": 0.6000000000000001,
-          "n": 1,
-          "mean_p": 0.470636529795226,
-          "frac_scam": 1.0
-        },
-        {
-          "lo": 0.6000000000000001,
-          "hi": 0.8,
-          "n": 3,
-          "mean_p": 0.7605251383609167,
-          "frac_scam": 0.6666666666666666
         },
         {
           "lo": 0.8,
           "hi": 1.0,
-          "n": 81,
-          "mean_p": 0.9777427778876517,
-          "frac_scam": 0.9876543209876543
+          "n": 85,
+          "mean_p": 0.9959910942344192,
+          "frac_scam": 0.9764705882352941
         }
       ],
-      "ece": 0.02190628277454062,
-      "brier": 0.015554343888619681
+      "ece": 0.01935506863961431,
+      "brier": 0.014716332110405444
     },
     "mistakes": [
+      {
+        "text": "Dear Customer, your Aadhaar e-Sign request for loan agreement is pending. Complete e-sign within 30 min to avoid UIDAI penalty: https://uidai-esign.co.in/verify",
+        "label": "SCAM",
+        "category": "KYC/Bank",
+        "verdict": "SCAM",
+        "p_scam": 1.0,
+        "pred_category": "Other"
+      },
       {
         "text": "Dear SBI user, your SBI reward points Rs 7,250 will expire today. Download SBI REWARDS.apk and redeem now to your account. https://bit.ly/sbi-rwd",
         "label": "SCAM",
@@ -854,43 +773,51 @@
         "pred_category": "Other"
       },
       {
-        "text": "Message 2/2: Kindly share the six digit number we just sent so we can resolve it. Thanks for your patience!",
+        "text": "Hi Rohan Sharma, this is Inspector Vikram Rathore, Mumbai Cyber Cell. Your Aadhaar 4521 8890 1234 and PAN ABCPS1234K are linked to a drugs parcel. Pay Rs 49,000 to rathore.vikram@okaxis or call 9812345678 or mail vikram.r@gmail.com. Your account 50100234567890 will be frozen. Ref case MH/2026/7781 at Andheri, flat 402 Sunshine Apts.",
         "label": "SCAM",
         "category": "Other",
         "verdict": "SCAM",
-        "p_scam": 0.754,
+        "p_scam": 1.0,
         "pred_category": "KYC/Bank"
       },
       {
-        "text": "Hello sir, I'm the HR from Deloitte. You are shortlisted. Please fill the onboarding form with your bank details and a refundable security deposit of 2000: https://forms.gle/Dlt0nboard",
+        "text": "Hi! This is Priya from the bank's verification desk. Kindly fill this short form so your account keeps working smoothly: https://forms.gle/AbC123xyz Thank you for banking with us :)",
         "label": "SCAM",
-        "category": "Job/Investment",
+        "category": "KYC/Bank",
+        "verdict": "SCAM",
+        "p_scam": 0.984,
+        "pred_category": "Other"
+      },
+      {
+        "text": "Bro urgent! Account khatam ho jayega. Click karo and verify: bit.ly/3xYz",
+        "label": "SCAM",
+        "category": "KYC/Bank",
         "verdict": "SCAM",
         "p_scam": 1.0,
         "pred_category": "Other"
       },
       {
-        "text": "Respected user, a small amount is pending for your FASTag. Kindly clear using the link below to avoid penalty: tinyurl.com/fastag-pay",
+        "text": "Your account needs a quick re-verification. Use our secure page: https://docs.google.com/forms/d/e/1FAIpQLSf/viewform",
+        "label": "SCAM",
+        "category": "KYC/Bank",
+        "verdict": "SCAM",
+        "p_scam": 0.996,
+        "pred_category": "Other"
+      },
+      {
+        "text": "Your Netflix membership is on hold. We are having trouble with your current billing information. Update here: https://netflix-billing-help.com",
         "label": "SCAM",
         "category": "Other",
         "verdict": "SCAM",
-        "p_scam": 0.953,
+        "p_scam": 0.993,
         "pred_category": "KYC/Bank"
-      },
-      {
-        "text": "URGENT: Your exam fee payment failed. Pay now or you'll be barred from exams. Link: http://univ-portal.co",
-        "label": "SCAM",
-        "category": "Other",
-        "verdict": "SUSPICIOUS",
-        "p_scam": 0.471,
-        "pred_category": "Other"
       },
       {
         "text": "Jaldi karo bhai, tumhara khata band hone wala hai, ye link kholo aur details bharo: http://khata-verify.in",
         "label": "SCAM",
         "category": "KYC/Bank",
         "verdict": "SCAM",
-        "p_scam": 0.991,
+        "p_scam": 0.999,
         "pred_category": "Other"
       },
       {
@@ -898,7 +825,7 @@
         "label": "SAFE",
         "category": "",
         "verdict": "SCAM",
-        "p_scam": 0.896,
+        "p_scam": 0.98,
         "pred_category": "Other"
       },
       {
@@ -906,7 +833,7 @@
         "label": "SAFE",
         "category": "",
         "verdict": "SCAM",
-        "p_scam": 0.778,
+        "p_scam": 0.975,
         "pred_category": "Lottery/Prize"
       }
     ]
@@ -920,56 +847,56 @@
       {
         "lo": 0.0,
         "hi": 0.2,
-        "n": 1004,
-        "mean_p": 0.018778840947499813,
-        "frac_scam": 0.01195219123505976
+        "n": 1065,
+        "mean_p": 0.010601046278540924,
+        "frac_scam": 0.005633802816901409
       },
       {
         "lo": 0.2,
         "hi": 0.4,
-        "n": 23,
-        "mean_p": 0.3266175186340842,
-        "frac_scam": 0.13043478260869565
+        "n": 34,
+        "mean_p": 0.2863096895288149,
+        "frac_scam": 0.058823529411764705
       },
       {
         "lo": 0.4,
         "hi": 0.6000000000000001,
-        "n": 24,
-        "mean_p": 0.514266958827462,
-        "frac_scam": 0.7916666666666666
+        "n": 5,
+        "mean_p": 0.5153552063572204,
+        "frac_scam": 0.2
       },
       {
         "lo": 0.6000000000000001,
         "hi": 0.8,
-        "n": 32,
-        "mean_p": 0.7319075158045258,
-        "frac_scam": 0.90625
+        "n": 14,
+        "mean_p": 0.7250939978484807,
+        "frac_scam": 0.7142857142857143
       },
       {
         "lo": 0.8,
         "hi": 1.0,
-        "n": 718,
-        "mean_p": 0.9815822066712719,
-        "frac_scam": 0.9972144846796658
+        "n": 811,
+        "mean_p": 0.9900034022555235,
+        "frac_scam": 0.9938347718865598
       }
     ],
-    "ece": 0.01933741661982044,
-    "brier": 0.014997225578878823
+    "ece": 0.009258671074681712,
+    "brier": 0.009491889020920435
   },
   "robustness": {
-    "n": 518,
-    "caught_original": 0.9768339768339769,
-    "caught_disguised": 0.9845559845559846,
+    "n": 568,
+    "caught_original": 0.9947183098591549,
+    "caught_disguised": 0.9964788732394366,
     "examples": [
-      "Your SBI YONO account has bееn suspended due to incomplete KYC. C.L.I.C.K cutt.ly/qJ7L to update PAN W I T H I N 12 hours.",
-      "Your HDFC Bank Y0N0 account has been suspended due to incomplete KYC. Click t.ly/XfU5J5p to update PAN within 24 hours.",
-      "Y​o​u​r PNB YONO account has been suspended due to i​n​c​o​m​p​l​e​t​e KYC. C​l​i​c​k pnb-kyc.icu to update PAN w​i​t​h​i​n 48 hours.",
-      "Y0ur I-C-I-C-I B.A.N.K YONO account has been suspended due to incomplete KYC. C.L.I.C.K https://icici.in-secure.top to U.P.D.A.T.E PAN within 48 hours.",
-      "Your HDFC Bank YONO @ccount has been suspended due to incomplete KYC. Click tinyurl.com/vZBr to update PAN wіthіn 2 hours."
+      "Deаr Bank of Baroda user, y​o​u​r KYC is pending. Account w​i​l​l be deactivated tonіght. Call our KYC officer on 9732010170.",
+      "D.E.A.R C​a​n​a​r​a Bank u​s​e​r​, your KYC is pending. A C C O U N T will be D E A C T I V A T E D tonight. Call our KYC officer on 7034778660.",
+      "Dear Bank of Baroda usеr, your KYC is pending.... A-C-C-O-U-N-T will be D-E-A-C-T-I-V-A-T-E-D tonight. C@ll our KYC officer on 7910867713.",
+      "Dear I​C​I​C​I Bank user, your KYC is pending. Accounttttt will be deactivated tonight. Call our KYC o​f​f​i​c​e​r on +91 71476 49251.",
+      "Dear Canara Bank user,,,, your KYC is pending. Account will be deactivatedddd tonight. C​a​l​l our KYC officer on +917757383959."
     ],
     "without_cleaner": {
-      "caught_original": 0.9691119691119691,
-      "caught_disguised": 0.9517374517374517
+      "caught_original": 0.9929577464788732,
+      "caught_disguised": 0.9947183098591549
     }
   }
 }

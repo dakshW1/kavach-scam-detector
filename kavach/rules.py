@@ -71,7 +71,9 @@ RULES: list[tuple[str, str, str, str, str]] = [
      r"\b(congratulations?|congrats|mubarak|badhai ho)\b|बधाई"),
     ("fee", "Asks you to pay first", "high",
      "It asks you to pay a fee, tax or deposit before you get money, a loan, a job or a parcel. Paying to receive is the core of most frauds.",
-     r"\b(processing|registration|joining|security|clearance|transfer|delivery|redelivery|customs|gst|tax|insurance|verification|activation|file|handling|shipping|upgrade)\s+(fee|fees|charge|charges|deposit|amount)\b"
+     r"\b(processing|registration|joining|security|clearance|transfer|delivery|redelivery|customs|gst|tax|insurance|verification|activation|file|handling|shipping|upgrade|scholarship|internship|training|certificate|onboarding)\s+(fee|fees|charge|charges|deposit|amount)\b"
+     + r"|\bpay\b(\s+\S+){0,8}\s+(or|warna|nahi to)\s+(you will be |you'll be |you will |aap )?(barred|debarred|blocked|cancelled|disqualified|rejected|cannot appear|can't appear)"
+     + r"|\b(buy|purchase|order)\s+(\S+\s+){0,4}(product|item|kit|course)\s+(\S+\s+){0,3}(first|before)\b|\b(first|pehle)\s+(buy|purchase|pay|kharid\w*)\b"
      + r"|\bpay\s+(only\s+|just\s+)?(rs\.?|inr|₹)?\s?\d+[\d,]*\s+(\S+\s+){0,4}(to|for|and)\s+(claim|receive|release|get|unlock|activate|confirm|process)"
      + r"|\b(pay|send|bhej\w*|jama|deposit|clear)\b(\s+\S+){0,4}\s+(handling|shipping|stamp duty|duty|insurance|gst|clearance|registration|processing|file|delivery) ?(fee|fees|charge|charges)?\b"
      + r"|\b(fee|fees|charge|charges|shulk)\s+(\S+\s+){0,3}(bhej\w*|jama|bhar\w*)|\b(rupay|rupaye|rupees)\s+(bhej\w*|jama|bhar\w*)"
@@ -85,11 +87,11 @@ RULES: list[tuple[str, str, str, str, str]] = [
     ("job_bait", "Job / task bait", "high",
      "It offers easy money for simple online tasks or part-time work. These 'task jobs' end with you paying to withdraw your earnings.",
      r"\b(part[- ]?time|work from home|wfh|home based|online (job|work)|data entry|typing job|like (videos?|posts?)|youtube (likes?|task|videos?)|subscribe (and|&) earn|daily (income|earning|payment)|paid daily"
-     + r"|earn\s+(rs\.?|₹|inr)?\s?\d[\d,]*|(rs\.?|₹|inr)?\s?\d[\d,]*\s*(/|per|a)\s*(day|d|review|task|like)\b|kama(o|ye|yein|en)|rozana|ghar baithe|hiring|reviewers? needed|remote (job|role|work)"
+     + r"|earn\s+(rs\.?|₹|inr)?\s?\d[\d,]*|(rs\.?|₹|inr)?\s?\d[\d,]*\s*(/|per|a)\s*(day|d|review|task|like)\b|kama(o|ye|yein|en)|rozana|ghar baithe|hiring now|urgent hiring|reviewers? needed|remote (job|role|work)|brand ambassador|collab with you|paid collab"
      + r"|(resume|profile)\s+(is\s+)?(shortlisted|selected|matches)|(you are|you have been|you're|aap) (shortlisted|selected for (the |a )?(job|role|post|position|interview))|onboarding (form|fee|kit)|hr (team|from|department) (of|from|at)?|salary \d|task (based|completion|earnings?|commission)|prepaid task|telegram task|commission per task|mentor)\b|पार्ट टाइम|घर बैठे|कमाएं|कमाइए"),
     ("invest_bait", "Investment bait", "high",
      "It promises guaranteed or very high returns. Real investments never guarantee profit; this is how trading and crypto frauds start.",
-     r"\b(guaranteed (returns?|profit|income)|double (your|the)? ?money|paisa double|doubles?\b|double (hota|ho jata)|\d{1,3}\s?% (returns?|profit|monthly|daily|weekly)|\d{1,3}\s?% (\S+\s+)?daily|returns? of \d+\s?%|crypto|bitcoin|usdt|trading (tips|group|signals)|signals|stock tips|insider|ipo allotment|vip (group|trading)|forex|investment plan|gold scheme|high returns?|risk[- ]free|multiply|pakka|for life|lagao|daal de)\b"),
+     r"\b(guaranteed (returns?|profit|income)|double (your|the)? ?money|paisa double|(money|paisa|amount|investment|returns?) (will |gets? |is )?doubled?\b|doubles? (your|in) \d+|double (hota|ho jata)|\d{1,3}\s?% (returns?|profit|monthly|daily|weekly)|\d{1,3}\s?% (\S+\s+)?daily|returns? of \d+\s?%|crypto|bitcoin|usdt|trading (tips|group|signals)|signals|stock tips|insider|ipo allotment|vip (group|trading)|forex|investment plan|gold scheme|high returns?|risk[- ]free|multiply|pakka|for life|lagao|daal de)\b"),
     ("authority", "Pretends to be an authority", "high",
      "It claims to come from police, CBI, customs, courts, TRAI or a tax office and threatens you. Officials never threaten arrest or demand money over SMS or video call.",
      r"\b(cbi|police|cyber cell|crime branch|narcotics|ncb|customs (department|officer|duty)|court (notice|summons|order|case|action)|arrest (warrant)?|digital arrest|fir|legal action|trai|ed officer|enforcement directorate|money laundering|illegal (items?|parcel|drugs?|messages?|activity)|drugs?|passports?|case (is |has been )?registered|giraftar\w*)\b|पुलिस|गिरफ्तार|ड्रग्स|कस्टम्स|सीबीआई"),
@@ -106,7 +108,13 @@ RULES: list[tuple[str, str, str, str, str]] = [
     ("collect_request", "UPI 'receive money' trick", "high",
      "It asks you to approve a request or enter your UPI PIN to RECEIVE money, or claims money was sent 'by mistake'. A UPI PIN is only ever needed to SEND money.",
      r"\b(enter|type|use)\s+(your\s+)?(upi\s+)?pin\s+(\S+\s+){0,3}(receive|get|accept|credit)|\b(approve|accept)\s+(the\s+)?(\S+\s+)?(collect\s+)?request|\b(scan|scan the qr)\s+(\S+\s+){0,3}(receive|get)"
-     + r"|(sent|paid|transferred)\s+(\S+\s+){0,5}by mistake|collect request"),
+     + r"|(sent|paid|transferred)\s+(\S+\s+){0,5}by mistake|collect request"
+     # Hinglish / Hindi: "QR scan karo aur PIN dalo, paisa aa jayega", "request bheja hai, approve kar do"
+     + r"|\b(upi )?pin\s+(\S+\s+){0,2}(dalo|daalo|daal do|dal do|dalein|daalein|daliye|daaliye|enter karo|enter kare\w*|lagao|likho)"
+     + r"|\bqr\s+(code\s+)?(\S+\s+){0,2}(scan|skan)\s*(karo|kare\w*|kijiye|kar do|kar ke)?(\s+\S+){0,6}\s+(paisa|paise|payment|money|amount)"
+     + r"|\b(approve|accept)\s+(kar\w*|kijiye|karna|kar dena|kar do)\b|\brequest\s+(\S+\s+){0,3}(bhej\w*|aaya|aayega|gaya)\b(\s+\S+){0,6}\s+(approve|accept)"
+     + r"|\bpaisa\s+(\S+\s+){0,3}(aa jayega|aa jaega|aayega|mil jayega)|\bgalti se\s+(\S+\s+){0,4}(bhej|transfer|aa)\w*"
+     + r"|(यूपीआई |upi )?(पिन|pin)\s+(\S+\s+){0,2}(डाल|दर्ज)|क्यूआर|qr\s*(कोड|code)?\s+(\S+\s+){0,1}(स्कैन)|अप्रूव"),
     ("remote_app", "Asks to install an app", "high",
      "It asks you to install a screen-sharing or unknown app (AnyDesk, TeamViewer, an .apk). That gives the scammer control of your phone.",
      r"\b(anydesk|any desk|teamviewer|team viewer|quick ?support|rustdesk|airdroid|screen ?shar\w*|download (this|the|our) app|install (this|the|our) app|apk)\b|\b(install|download)\s+(\S+\s+){0,3}(app|application)\b(\s+\S+){0,2}\s+(from|at)\b"),
@@ -171,7 +179,9 @@ GOOD_RULES: list[tuple[str, str, str, str]] = [
     ("handover_code", "Delivery / ride code",
      "It gives YOU a code to show the delivery agent or driver in person – that is how genuine delivery and ride OTPs work.",
      r"\b(share|give|show|tell)\s+(\S+\s+){0,4}(only )?(with|to|at) (the |your )?(delivery|agent|driver|captain|rider|doorstep|door|time of delivery|partner|executive at)"
-     r"|\b(delivery|ride|trip) (otp|code|pin)\b|\b(only )?after (boarding|you receive|receiving|delivery)\b|\bat (the )?(doorstep|door|time of delivery)\b"),
+     r"|\b(delivery|ride|trip) (otp|code|pin)\b|\b(only )?after (boarding|you receive|receiving|delivery)\b|\bat (the )?(doorstep|door|time of delivery)\b"
+     r"|\b(to (start|begin) (the |your )?(trip|ride|journey)|on delivery|at delivery|on arrival|when (the |your )?(order|parcel|package|food) (arrives|reaches))\b"
+     r"|\b(pickup|pick-up|return|handover|hand-over) (code|otp|pin)\b"),
     ("awareness", "Fraud-awareness message",
      "It warns you about fraud and points to official channels without asking you for anything – typical of genuine bank and police alerts.",
      r"\b(beware|fraudsters?|is a scam|are fraud|such messages|never (asks?|sends?|calls?)|will never (ask|call)|do not click (on )?links"
@@ -179,7 +189,16 @@ GOOD_RULES: list[tuple[str, str, str, str]] = [
     ("shop_offer", "Ordinary shopping offer",
      "It is a normal discount or reward from a shop (coupon code, % off, coins or cashback already added) and asks for no payment or details.",
      r"\b(\d+\s?% off|use code [a-z0-9]{3,}|with code [a-z0-9]{3,}|coupon|supercoins|reward points? (added|credited|earned)|cashback (has been |is )?(added|credited)"
-     r"|added to your (google pay |gpay |paytm )?(rewards|wallet)|t&c apply)\b"),
+     r"|added to your (\S+ ){0,2}(rewards|wallet|balance)|t&c apply|for your (recent |last )?(order|purchase)|free delivery|already applied|collect (it )?at (the )?(billing |cash )?counter|show this (sms|message) at (the )?(store|counter))\b"),
+    ("event_result", "Result of a real event",
+     "It announces the result of a competition, exam or event with where and when prizes are given – and asks you for nothing.",
+     r"\b(tournament|competition|contest|hackathon|quiz|olympiad|sports day|race|chess|debate|fest|conference|exam results?|semester)\b"
+     r"(\s+\S+){0,12}\s+(prize distribution|certificate|ceremony|auditorium|assembly|at the venue|on stage|will be (given|distributed|emailed))"
+     r"|\b(prize distribution|closing ceremony|award ceremony)\b"),
+    ("no_fee", "Says there is no fee",
+     "It says plainly that nothing is charged – genuine employers, colleges and offices say this; scammers ask for a fee.",
+     r"\b(no (fee|fees|charges?|payment|money) (is |are |will be )?(charged|required|needed|taken|at any stage)|(fee|fees|charges?) (is |are )?not (charged|required)"
+     r"|never (charge|ask for|asks for|collect) (any )?(fee|fees|money|payment)|free of (cost|charge)|no registration fee)\b"),
     ("visit_branch", "Sends you to the branch / official app",
      "It asks you to visit the branch or use the official app yourself, instead of clicking a link or calling a number.",
      r"\b(visit (your |the |any )?(nearest )?(\S+ ){0,2}branch|at (any|your nearest|the nearest) (\S+ )?branch|through the official app|on the official (portal|app|website))\b"),
@@ -188,7 +207,10 @@ GOOD_RULES: list[tuple[str, str, str, str]] = [
      r"\b(a/?c|acct|account|card|ac)\s*(no\.?\s*)?(x{2,}|\*{2,}|ending( with)?\s*|xx)\s*\d{3,4}\b|\b(x{2,}|\*{2,})\d{3,4}\b"),
     ("transaction_ref", "Transaction details",
      "It has a reference number or available balance, which genuine transaction alerts include.",
-     r"\b(upi ref\w*|ref\.? no|txn (id|no)|utr|imps ref|avl\.? bal|available balance|avl bal|a/c bal|ref no|order (id|#|no))\b"),
+     r"\b(upi ref\w*|ref\.? no|txn (id|no)|utr|imps ref|avl\.? bal|available balance|avl bal|a/c bal|ref no)\b"),
+    ("order_update", "Order / delivery update",
+     "It is an update about an order you placed (shipped, out for delivery, delivered) – the normal kind of shop message.",
+     r"\b(order\s+(\S+\s+){0,6}(has been |is |was )?(shipped|dispatched|packed|delivered|confirmed|placed|out for delivery|on (the|its) way)|out for delivery|has been delivered|track (your order|it|at|on|here))\b"),
     ("not_you_report", "Gives an official way to report",
      "It tells you to call the official helpline or block the card if it wasn't you, which banks do in real alerts.",
      r"\b(not you|if not done by you|not done by you)\b|sms block|call (the )?(18\d{2}|1930)"),
@@ -204,7 +226,31 @@ _COMPILED = [(i, l, s, r, re.compile(p)) for i, l, s, r, p in RULES]
 _GOOD = [(i, l, r, re.compile(p)) for i, l, r, p in GOOD_RULES]
 
 RULE_IDS = [r[0] for r in RULES] + ["family_emergency"] + [g[0] for g in GOOD_RULES] + [
-    "link_dangerous", "link_suspicious", "link_official", "personal_mobile", "disguised", "brand_mentioned"]
+    "link_dangerous", "link_suspicious", "link_official", "personal_mobile", "disguised", "brand_mentioned",
+    "link_action", "unreadable_script"]
+
+# Scripts Kavach can read: Latin (English / Hinglish) and Devanagari (Hindi). Text mostly in another script
+# (Malayalam, Tamil, Telugu, Bengali...) cannot be judged by the model, so it must never be called safe.
+READABLE_SCRIPTS = ("LATIN", "DEVANAGARI")
+LINK_ACTION = re.compile(r"\b(click|tap|visit|open|go to|log ?in|kholo|kholiye|dabayein)\b(\s+\S+){0,6}\s+(to\s+)?(cancel|stop|block|unblock|verify|"
+                         r"confirm|update|claim|redeem|activate|reactivate|avoid|dispute|reverse|refund|pay|unlock)\b|\b(cancel|stop|dispute|reverse)\b(\s+\S+){0,4}\s+(click|tap|visit|open)\b")
+
+
+def unreadable_share(text: str) -> tuple[float, str | None]:
+    """Share of letters in scripts Kavach cannot read, and the name of the main such script."""
+    import unicodedata
+    letters = [c for c in text if c.isalpha()]
+    if not letters:
+        return 0.0, None
+    other = {}
+    for c in letters:
+        name = unicodedata.name(c, "")
+        script = name.split(" ")[0]
+        if not name.startswith(READABLE_SCRIPTS):
+            other[script] = other.get(script, 0) + 1
+    n = sum(other.values())
+    main = max(other, key=other.get).title() if other else None
+    return n / len(letters), main
 
 
 def _flag_from(norm: Normalized, start: int, end: int, rule: str, label: str, sev: str, reason: str) -> Flag:
@@ -229,6 +275,8 @@ def find_flags(text: str, norm: Normalized | None = None) -> tuple[list[Flag], l
         for m in rx.finditer(t):
             if rid == "asks_secret" and any(a <= m.start() + 3 and m.start() <= b for a, b in good_spans):
                 continue  # "do not share this OTP" is a good sign, not a red flag
+            if rid == "asks_secret" and re.search(r"\bpin ?code\b", m.group()) and not re.search(r"\b(upi|atm|card|mpin)\b", m.group()):
+                continue  # a postal PIN code for an address is not a secret
             if rid == "asks_secret" and re.search(r"(otp|code) (is|:)\s*\d{4,8}|\d{4,8} is (your|the) (otp|code)", t) \
                     and not re.search(r"(share|send|tell|forward)\s+(\w+\s+){0,3}(with|to)\s+(our|the|this|us)", t):
                 continue  # an OTP message that contains the code itself is not asking for it
@@ -241,6 +289,11 @@ def find_flags(text: str, norm: Normalized | None = None) -> tuple[list[Flag], l
     if "planned_notice" in rules_found:
         # a scheduled-maintenance notice announces a power cut by definition; that is not a threat
         flags = [f for f in flags if f.rule not in ("disconnection", "threat")]
+    if re.search(r"\b(no hurry|no rush|not urgent|whenever you can|when you can|koi jaldi nahi|jaldi nahi hai)\b", t):
+        flags = [f for f in flags if f.rule != "urgency"]   # "send it when you can, no hurry" is the opposite of urgency
+    if re.search(r"\b(ho gaya tha|ho gayi thi|was blocked|got blocked|had blocked)\b", t) and \
+            re.search(r"\b(karwa liya|kar liya|theek|thik|sorted|fixed|resolved|ab sab|now it is fine|all good now)\b", t):
+        flags = [f for f in flags if f.rule not in ("threat", "kyc")]   # telling a past, already-solved problem is not a threat
     if "handover_code" in rules_found:
         # "share OTP 4512 with the delivery agent at your door" is how delivery/ride codes work, not a request for a secret
         flags = [f for f in flags if f.rule not in ("asks_secret", "urgency")]
@@ -275,6 +328,26 @@ def find_flags(text: str, norm: Normalized | None = None) -> tuple[list[Flag], l
                                   "It asks you to contact an ordinary 10-digit mobile number. Banks and companies use "
                                   "official helplines (often 1800...), not personal mobiles.", "medium", a, b, text[a:b]))
                 break
+
+    if "visit_branch" in {f.rule for f in flags}:
+        # "update your KYC at your nearest branch" is what genuine banks say – not "KYC by message"
+        flags = [f for f in flags if f.rule != "kyc"]
+
+    risky_links = [lf for lf in links if lf.verdict in ("unknown", "suspicious", "dangerous")]
+    m = LINK_ACTION.search(t)
+    if risky_links and m:
+        lf = risky_links[0]
+        flags.append(Flag("link_action", "Asks you to act through an unknown link",
+                          "It asks you to click a link that is not an official website to cancel, verify, claim or pay. "
+                          "Genuine banks and companies tell you to use their official app or helpline instead.",
+                          "medium", lf.start, lf.end, text[lf.start:lf.end]))
+
+    share, script = unreadable_share(text)
+    if share >= 0.3:
+        flags.append(Flag("unreadable_script", f"Written in {script or 'a language'} – Kavach can't read it",
+                          f"Most of this message is in {script or 'a script'} script, which Kavach's model was not trained on. "
+                          "It can only check the numbers, links and English words in it, so it cannot call this message safe.",
+                          "medium", 0, 0, ""))
 
     if norm.disguised:
         tricks = ", ".join(k for k, v in norm.tricks.items() if v and k in

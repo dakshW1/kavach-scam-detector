@@ -113,10 +113,14 @@ def analyze(text: str, sender: str = "", model: KavachModel | None = None) -> Re
         verdict = "SUSPICIOUS"
         safety_net = ("This looks like a chain forward or a donation appeal. It may not be a bank scam, but do not forward it "
                       "or pay until you have checked it with the organisation directly.")
-    elif verdict == "SAFE" and rule_ids & {"asks_secret", "family_emergency", "collect_request", "remote_app"} \
+    elif verdict == "SAFE" and rule_ids & {"asks_secret", "family_emergency", "collect_request", "remote_app", "fee", "link_action"} \
             and not rule_ids & {"otp_dont_share", "handover_code", "awareness"}:
         verdict = "SUSPICIOUS"
         safety_net = "The wording looks ordinary, but it asks for something scammers ask for, so please verify before you act."
+    if "unreadable_script" in rule_ids and verdict == "SAFE":
+        verdict = "SUSPICIOUS"
+        safety_net = ("Kavach cannot read most of this message's language, so it cannot call it safe. Ask someone who reads it, "
+                      "and never share an OTP or PIN, or pay, because of a message you cannot fully understand.")
 
     cats = model.category_proba([text], X)[0]
     cat_probs = {c: float(cats[list(model.category.classes_).index(c)]) for c in CATEGORIES}
@@ -131,13 +135,17 @@ def analyze(text: str, sender: str = "", model: KavachModel | None = None) -> Re
         family = family_for(category, rule_ids, norm.text)
         if unfamiliar and family in ("unknown", None):
             family = "unknown"
-        if family in STRONG_FAMILIES:
-            # a scam type proven by its own rule (e.g. digital arrest) decides the category, so the two never disagree
+        if "unreadable_script" in rule_ids:
+            category, unfamiliar, family = "Other", True, "unknown"   # cannot name a scam type in a language we cannot read
+        elif family in STRONG_FAMILIES and cat_probs.get(category, 0) < 0.6:
+            # the model is unsure of the category, but a rule proved the scam type (e.g. digital arrest): use the type's category
             category, unfamiliar = FAMILIES[family]["category"], False
 
     conf = p if verdict == "SCAM" else (1 - p) if verdict == "SAFE" else max(p, 1 - p)
     if n_words < 8 and len([f for f in flags if f.severity in ("high", "good")]) == 0:
         conf = min(conf, 0.85)  # a very short message without clear signs cannot support a near-certain verdict
+    if "unreadable_script" in rule_ids:
+        conf = min(conf, 0.6)   # the model did not understand most of the text
     flags.sort(key=lambda f: (SEV_ORDER.get(f.severity, 9), f.start))
     words = []
     for name, w in model.contributions(X[0]):
