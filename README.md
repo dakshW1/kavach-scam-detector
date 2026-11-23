@@ -44,7 +44,7 @@ same app is also included: `streamlit run app.py` (http://localhost:8501).
 
 To change the website's code, rebuild it with Node.js 20+: `cd web && npm install && npm run build`.
 
-The trained model (`models/kavach.joblib`, 1.2 MB) is included. To rebuild everything from scratch:
+The trained model (`models/kavach.joblib`, 1.4 MB) is included. To rebuild everything from scratch:
 
 ```bash
 python data/generate.py        # builds data/messages.csv (needs data/raw/SMSSpamCollection, included)
@@ -100,12 +100,19 @@ Every number is on messages the model never saw during training (from `results/m
 | Held-out templates + UCI messages (split by template) | 1,551 | 99.4% | 610/617 | 0/934 | 13/934 | 89.0% |
 
 - **Real delivery OTPs, bank alerts and OTPs (final test v2):** none marked SCAM or SUSPICIOUS.
+- **The 7 genuine messages called SCAM** across the four hand-written sets: 3 prize/award announcements (quiz,
+  best paper, hackathon), 3 family messages about money or a new number, 1 joke about a lottery ticket. None is a
+  bank alert, OTP or delivery message.
+- **How SUSPICIOUS is counted:** for "scams caught", SCAM or SUSPICIOUS counts as caught (the user is warned). For
+  "genuine called SCAM", only SCAM counts; SUSPICIOUS on a genuine message is reported in its own column.
 - **Chain forwards and hoaxes:** both hoaxes in the tester set are flagged, not called SAFE.
-- **Confidence reliability:** expected calibration error 0.019, Brier score 0.015 (all test sets together). Most
+- **Confidence reliability:** expected calibration error 0.009, Brier score 0.009 (all test sets together, model
+  probability before the rule safety nets). Most
   messages are easy, so the 20–80% range holds few examples. A very short message with no clear sign is capped at 85%.
-- **Disguised text:** test scams were caught 97.7% of the time as written and 98.5% after random disguise tricks.
-  Retrained without the cleaner, the model catches 95.2% of the disguised copies.
-- **Speed and size:** about 15–25 ms per message on a laptop CPU. The model is 1.3 MB.
+- **Disguised text:** test scams were caught 99.5% of the time as written and 99.6% after random disguise tricks
+  (568 messages). Retrained without the cleaner, the model still catches 99.5% of the disguised copies: the character
+  n-grams already absorb most tricks, and the cleaner's main job now is showing the user what it read.
+- **Speed and size:** about 15–25 ms per message on a laptop CPU. The model is 1.4 MB.
 
 **Read these numbers with care.** Much of the Indian training data is generated from templates. The hand-written sets
 are small (68–137 messages), so each message moves the percentages by 1–3 points. Real-world accuracy will probably be

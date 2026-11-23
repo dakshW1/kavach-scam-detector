@@ -119,7 +119,7 @@ export default function Results() {
                   ['🧱', 'Network guard in code', 'kavach/netguard.py replaces Python’s socket functions at start-up; any non-local connection raises an error.'],
                   ['🧪', 'Automated proof', 'pytest tests/test_privacy.py asserts zero outgoing connections and that the diary holds no numbers, OTPs or links.'],
                   ['🏠', 'Local only', 'The server listens on 127.0.0.1 only; fonts, three.js and every script are bundled – the browser fetches nothing from the internet.'],
-                  ['🧠', 'No cloud AI', 'The model is a 1.2 MB local file. No API keys, no accounts.'],
+                  ['🧠', 'No cloud AI', 'The model is a 1.4 MB local file. No API keys, no accounts.'],
                   ['🌐', 'One opt-in exception', 'The news search shows its exact words first, sends only scam type + brand, and can reach a single host.'],
                 ].map(([i, h, t]) => (
                   <SpotlightCard key={h} className="spot" theme="dark" spotlightColor="rgba(143, 203, 168, 0.22)" style={{ padding: 22, background: 'rgba(255,255,255,.04)' }}>
