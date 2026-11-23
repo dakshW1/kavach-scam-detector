@@ -13,6 +13,9 @@ from .normalize import normalize
 from .rules import RULE_IDS, Flag, find_flags, flag_vector
 
 SEV_ORDER = {"high": 0, "medium": 1, "low": 2, "good": 3}
+# a request for money ("lend me 5k", "send Rs 2000", "paise bhej") – used with the secrecy flag
+MONEY_ASK = re.compile(r"\b(lend|borrow|send|transfer|pay|bhej|de do|udhaar|loan)\b.{0,40}(\brs\.?|₹|\b\d+\s?k\b|\b\d{3,}\b|money|paise|paisa|rupees)"
+                       r"|(\brs\.?|₹|\b\d+\s?k\b|money|paise|paisa).{0,30}\b(lend|send|transfer|bhej|de do|udhaar)\b", re.I)
 STRONG_FAMILIES = {"digital_arrest", "remote_access", "family_emergency", "donation", "upi_collect", "electricity",
                    "parcel_customs", "pension_ppo", "account_takeover", "hoax_forward"}
 
@@ -117,6 +120,10 @@ def analyze(text: str, sender: str = "", model: KavachModel | None = None) -> Re
             and not rule_ids & {"otp_dont_share", "handover_code", "awareness"}:
         verdict = "SUSPICIOUS"
         safety_net = "The wording looks ordinary, but it asks for something scammers ask for, so please verify before you act."
+    elif verdict == "SAFE" and "pressure_secrecy" in rule_ids and MONEY_ASK.search(norm.text):
+        verdict = "SUSPICIOUS"
+        safety_net = ("It asks for money and tells you to keep it secret. Even if it seems to come from someone you know, "
+                      "call them on their old number before you send anything.")
     if "unreadable_script" in rule_ids and verdict == "SAFE":
         verdict = "SUSPICIOUS"
         safety_net = ("Kavach cannot read most of this message's language, so it cannot call it safe. Ask someone who reads it, "

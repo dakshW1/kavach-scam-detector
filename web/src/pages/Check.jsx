@@ -24,7 +24,21 @@ const EXAMPLES = {
   'Hindi OTP request': ['प्रिय ग्राहक, आपका डेबिट कार्ड ब्लॉक हो गया है। अनब्लॉक करने के लिए अपना ओटीपी हमें भेजें।', ''],
   'Genuine OTP': ['482913 is your OTP for txn of Rs 2,499 at Amazon. Valid for 10 mins. Do not share it with anyone. -SBI', 'AX-SBIINB-S'],
   'Genuine debit alert': ['Rs.500.00 debited from A/c XX1234 on 22-11-26 to VPA swiggy@icici (UPI Ref No 412345678901). Not you? Call 18001234567 to block. -HDFC Bank', 'VM-HDFCBK-S'],
+  // quieter scams: no "blocked today", no links – Kavach is less sure, which is the honest answer
+  'Army officer renting': ['Hello sir, I am in the army, posted at the border so cannot visit the flat. I will pay the advance by UPI, please accept the request I send', ''],
+  '"Wrong number"': ['Hi, is this Priya? Sorry, wrong number 🙂 btw I mentor a small stock group, members made 18% last month. Want me to add you? Only serious people.', ''],
+  'Gift from London': ['Hi dear, I sent you a small gift from London as promised. The courier company will contact you soon, just pay the small customs clearance', ''],
+  'Broadband technician': ['Welcome to your new broadband connection! For faster speed setup, our technician will call you and guide you to install the AnyDesk support app.', ''],
+  'Friend needs 5k': ["Hey, long time! I am in a bit of a fix, could you lend me 5k till Monday? Will return for sure. Please don't tell anyone", ''],
+  'Delivery OTP': ['Your Flipkart order is out for delivery today. Share OTP 4821 with the delivery agent only when you receive the package.', 'VM-FLPKRT-S'],
+  'Bill reminder': ['Dear customer, your electricity bill of Rs 1,140 for Oct is due on 28-11-26. Pay via the official app or bescom.co.in. Ignore if already paid.', 'VM-BESCOM-S'],
+  'Friend (Hinglish)': ['Bhai kal ka plan pakka? 7 baje station pe milte hain, tickets maine book kar di', ''],
 };
+const EXAMPLE_GROUPS = [
+  ['Obvious scams', ['Fake SBI KYC', 'Hinglish bijli scare', 'Disguised lottery', 'Task job', 'Hindi OTP request']],
+  ['Subtle scams', ['Army officer renting', '"Wrong number"', 'Gift from London', 'Broadband technician', 'Friend needs 5k']],
+  ['Genuine', ['Genuine OTP', 'Genuine debit alert', 'Delivery OTP', 'Bill reminder', 'Friend (Hinglish)']],
+];
 
 const when = ts => new Date(ts).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 
@@ -147,9 +161,14 @@ export default function Check({ onChange }) {
             {err && <p className="small" style={{ color: 'var(--glow-bad)', marginTop: 10 }}>{err}</p>}
             <div className="chips">
               <button className="chip paste-chip" onClick={paste} title="Ctrl+V also works">📋 {t('Paste')}</button>
-              <span className="small muted">{t('Try:')}</span>
-              {Object.keys(EXAMPLES).map(n => <button key={n} className="chip" onClick={() => pick(n)}>{n}</button>)}
+              <span className="small muted">{t('or try an example:')}</span>
             </div>
+            {EXAMPLE_GROUPS.map(([label, names]) => (
+              <div className="chips chip-group" key={label}>
+                <span className="chip-group-label">{t(label)}</span>
+                {names.map(n => <button key={n} className="chip" onClick={() => pick(n)}>{n}</button>)}
+              </div>
+            ))}
           </motion.div>
         </div>
       </section>

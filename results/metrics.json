@@ -16,7 +16,7 @@
     "f1": 0.9918300653594772,
     "caught_scam_or_suspicious": 0.9886547811993517,
     "safe_marked_scam": 0.0,
-    "safe_marked_suspicious": 0.014989293361884369,
+    "safe_marked_suspicious": 0.013918629550321198,
     "verdicts": {
       "scam": {
         "SCAM": 607,
@@ -25,8 +25,8 @@
       },
       "safe": {
         "SCAM": 0,
-        "SUSPICIOUS": 14,
-        "SAFE": 920
+        "SUSPICIOUS": 13,
+        "SAFE": 921
       }
     },
     "false_alarms_by_kind": {
@@ -85,15 +85,15 @@
         "Other": 202
       }
     },
-    "ms_per_message": 19.53266266924093,
+    "ms_per_message": 27.828926756939907,
     "calibration": {
       "bins": [
         {
           "lo": 0.0,
           "hi": 0.2,
-          "n": 905,
-          "mean_p": 0.009160890053340882,
-          "frac_scam": 0.0055248618784530384
+          "n": 906,
+          "mean_p": 0.00915813609393286,
+          "frac_scam": 0.005518763796909493
         },
         {
           "lo": 0.2,
@@ -105,9 +105,9 @@
         {
           "lo": 0.4,
           "hi": 0.6000000000000001,
-          "n": 5,
-          "mean_p": 0.5153552063572204,
-          "frac_scam": 0.2
+          "n": 4,
+          "mean_p": 0.49928818515357676,
+          "frac_scam": 0.25
         },
         {
           "lo": 0.6000000000000001,
@@ -124,8 +124,8 @@
           "frac_scam": 1.0
         }
       ],
-      "ece": 0.01356399643285161,
-      "brier": 0.006931629015635779
+      "ece": 0.01319458477047758,
+      "brier": 0.0067150469867889315
     }
   },
   "challenge": {
@@ -168,15 +168,15 @@
         "marked_suspicious": 0.0
       }
     },
-    "category_accuracy": 0.8679245283018868,
-    "category_macro_f1": 0.8779444444444444,
+    "category_accuracy": 0.8490566037735849,
+    "category_macro_f1": 0.8636868686868686,
     "category_confusion": {
       "KYC/Bank": {
-        "KYC/Bank": 11,
+        "KYC/Bank": 10,
         "Lottery/Prize": 0,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 1
+        "Other": 2
       },
       "Lottery/Prize": {
         "KYC/Bank": 0,
@@ -225,7 +225,7 @@
         "caught": 1.0
       }
     },
-    "ms_per_message": 20.334836633704224,
+    "ms_per_message": 29.043708910928153,
     "calibration": {
       "bins": [
         {
@@ -267,6 +267,14 @@
         "category": "KYC/Bank",
         "verdict": "SCAM",
         "p_scam": 1.0,
+        "pred_category": "Other"
+      },
+      {
+        "text": "Dеаr custоmеr, yоur Ваnk оf Ваrоdа КYС hаs ехpirеd. Updаtе аt bоb-kус.соm",
+        "label": "SCAM",
+        "category": "KYC/Bank",
+        "verdict": "SCAM",
+        "p_scam": 0.771,
         "pred_category": "Other"
       },
       {
@@ -383,15 +391,15 @@
         "marked_suspicious": 0.0
       }
     },
-    "category_accuracy": 0.972972972972973,
-    "category_macro_f1": 0.9777089783281735,
+    "category_accuracy": 0.9459459459459459,
+    "category_macro_f1": 0.9550000000000001,
     "category_confusion": {
       "KYC/Bank": {
-        "KYC/Bank": 8,
+        "KYC/Bank": 7,
         "Lottery/Prize": 0,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 0
+        "Other": 1
       },
       "Lottery/Prize": {
         "KYC/Bank": 0,
@@ -440,7 +448,7 @@
         "caught": 1.0
       }
     },
-    "ms_per_message": 20.520249999915702,
+    "ms_per_message": 28.35257083340063,
     "calibration": {
       "bins": [
         {
@@ -469,6 +477,14 @@
       "brier": 0.019432095100346037
     },
     "mistakes": [
+      {
+        "text": "ІСІСІ Bаnk: yоur ассоunt wіll bе lосkеd. Vеrіfy: icici-lock.top",
+        "label": "SCAM",
+        "category": "KYC/Bank",
+        "verdict": "SCAM",
+        "p_scam": 1.0,
+        "pred_category": "Other"
+      },
       {
         "text": "Hey, I accidentally sent my WhatsApp verification code to your number. Can you forward it to me please?",
         "label": "SCAM",
@@ -592,7 +608,7 @@
         "caught": 1.0
       }
     },
-    "ms_per_message": 19.817347058800376,
+    "ms_per_message": 29.984723529410342,
     "calibration": {
       "bins": [
         {
@@ -695,15 +711,15 @@
         "marked_suspicious": 0.0
       }
     },
-    "category_accuracy": 0.9036144578313253,
-    "category_macro_f1": 0.9548489666136725,
+    "category_accuracy": 0.891566265060241,
+    "category_macro_f1": 0.949134328358209,
     "category_confusion": {
       "KYC/Bank": {
-        "KYC/Bank": 30,
+        "KYC/Bank": 29,
         "Lottery/Prize": 0,
         "Loan/Credit": 0,
         "Job/Investment": 0,
-        "Other": 6
+        "Other": 7
       },
       "Lottery/Prize": {
         "KYC/Bank": 0,
@@ -734,7 +750,7 @@
         "Other": 33
       }
     },
-    "ms_per_message": 20.84462992695286,
+    "ms_per_message": 29.407429926940342,
     "calibration": {
       "bins": [
         {
@@ -766,6 +782,14 @@
       },
       {
         "text": "Dear SBI user, your SBI reward points Rs 7,250 will expire today. Download SBI REWARDS.apk and redeem now to your account. https://bit.ly/sbi-rwd",
+        "label": "SCAM",
+        "category": "KYC/Bank",
+        "verdict": "SCAM",
+        "p_scam": 1.0,
+        "pred_category": "Other"
+      },
+      {
+        "text": "Dear customer your ＳＢＩ ａｃｃｏｕｎｔ will be ｂｌｏｃｋｅｄ. Update K‍Y‍C: ｈｔｔｐ://sbi-kyc.in",
         "label": "SCAM",
         "category": "KYC/Bank",
         "verdict": "SCAM",
@@ -847,9 +871,9 @@
       {
         "lo": 0.0,
         "hi": 0.2,
-        "n": 1065,
-        "mean_p": 0.010601046278540924,
-        "frac_scam": 0.005633802816901409
+        "n": 1066,
+        "mean_p": 0.010597354680558873,
+        "frac_scam": 0.005628517823639775
       },
       {
         "lo": 0.2,
@@ -861,9 +885,9 @@
       {
         "lo": 0.4,
         "hi": 0.6000000000000001,
-        "n": 5,
-        "mean_p": 0.5153552063572204,
-        "frac_scam": 0.2
+        "n": 4,
+        "mean_p": 0.49928818515357676,
+        "frac_scam": 0.25
       },
       {
         "lo": 0.6000000000000001,
@@ -880,8 +904,8 @@
         "frac_scam": 0.9938347718865598
       }
     ],
-    "ece": 0.009258671074681712,
-    "brier": 0.009491889020920435
+    "ece": 0.008961648011777554,
+    "brier": 0.009317747638472814
   },
   "robustness": {
     "n": 568,

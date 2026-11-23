@@ -36,7 +36,7 @@ python -m venv .venv
 .venv\Scripts\activate            # Windows   (macOS/Linux: source .venv/bin/activate)
 pip install -r requirements.txt
 python server.py                  # the website: open http://127.0.0.1:8000
-pytest                            # 54 tests, including the privacy proof
+pytest                            # 75 tests, including the privacy proof
 ```
 
 The website is already built (`web/dist`), so Node.js is **not** needed to run it. A simpler Streamlit version of the
@@ -94,10 +94,10 @@ Every number is on messages the model never saw during training (from `results/m
 | Test set | Messages | Accuracy | Scams caught (SCAM or SUSPICIOUS) | Genuine marked SCAM | Genuine marked SUSPICIOUS | Category accuracy |
 |---|---|---|---|---|---|---|
 | **Final test v2** (hand-written before the v2 fixes, never used to improve the model) | 68 | 95.6% | 34/35 | 2/33 | 0/33 | 97.1% |
-| Final test v1 (hand-written before the first tuning) | 72 | 98.6% | 37/37 | 1/35 | 2/35 | 97.3% |
-| Messages typed by 5 persona testers, round 1 (used for error analysis) | 137 | 98.5% | 83/83 | 2/54 | 0/54 | 90.4% |
-| Challenge set (hand-written, used for error analysis) | 101 | 98.0% | 53/53 | 2/48 | 1/48 | 86.8% |
-| Held-out templates + UCI messages (split by template) | 1,551 | 99.4% | 610/617 | 0/934 | 14/934 | 89.0% |
+| Final test v1 (hand-written before the first tuning) | 72 | 98.6% | 37/37 | 1/35 | 2/35 | 94.6% |
+| Messages typed by 5 persona testers, round 1 (used for error analysis) | 137 | 98.5% | 83/83 | 2/54 | 0/54 | 89.2% |
+| Challenge set (hand-written, used for error analysis) | 101 | 98.0% | 53/53 | 2/48 | 1/48 | 84.9% |
+| Held-out templates + UCI messages (split by template) | 1,551 | 99.4% | 610/617 | 0/934 | 13/934 | 89.0% |
 
 - **Real delivery OTPs, bank alerts and OTPs (final test v2):** none marked SCAM or SUSPICIOUS.
 - **Chain forwards and hoaxes:** both hoaxes in the tester set are flagged, not called SAFE.
@@ -116,6 +116,16 @@ lower. The remaining mistakes are listed on the app's "How accurate is it?" page
 
 The untouched final test v2 moved from 0 to 2 genuine messages called SCAM after the v3 changes. That set is kept
 untouched, so the model was not tuned to get those two back.
+
+### v3.1 – two fixes found while choosing website examples
+
+- The Hinglish word "pakka" ("sure") alone no longer counts as investment bait ("kal ka plan pakka?" was marked
+  SUSPICIOUS). It still counts next to money ("30k pakka milega", "pakka profit").
+- A request for money that also says "don't tell anyone" can no longer come out SAFE.
+- The check page now has three rows of examples: obvious scams, **subtle scams** (no links, no "blocked today" –
+  Kavach is less sure about these, which is the honest answer) and genuine messages.
+- Verdicts on every test set are unchanged. Category accuracy dropped on three sets after the retrain (final v1
+  97.3% → 94.6%, testers 90.4% → 89.2%, challenge 86.8% → 84.9%; one or two messages each).
 
 ### What changed in v3 (second round of five persona testers)
 

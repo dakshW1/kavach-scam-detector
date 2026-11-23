@@ -190,6 +190,9 @@ button { font-family: inherit; }
 }
 .night-input option { color: var(--ink); }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
+.chip-group { margin-top: 8px; }
+.chip-group-label { font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); min-width: 112px; }
+@media (max-width: 640px) { .chip-group-label { min-width: 100%; } }
 .chip {
   border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.04); color: var(--night-text);
   padding: 6px 12px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer;

@@ -145,3 +145,17 @@ def test_genuine_no_fee_notice_delivery_and_branch_reminder():
 
 def test_postal_pin_code_is_not_a_secret():
     assert "asks_secret" not in rules("Please share your address with PIN code for the courier")
+
+
+# ---- found while picking website samples (v3.1)
+@pytest.mark.parametrize("msg", ["Kal ka match pakka? 6 baje ground pe aa jana", "Dinner pakka hai na aaj?"])
+def test_pakka_alone_is_not_investment_bait(msg):
+    assert "invest_bait" not in rules(msg)
+
+
+def test_pakka_with_returns_is_still_investment_bait():
+    assert "invest_bait" in rules("Is app me 10k lagao, 30k pakka milega")
+
+
+def test_secret_money_request_is_never_safe():
+    assert analyze("Hi, it's me. Need to borrow 3k today, will return Friday. Please don't tell anyone at home").verdict != "SAFE"

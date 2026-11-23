@@ -11,6 +11,7 @@ const HI = {
   'Sender (optional) e.g. AX-SBIINB-S or 98765 43210': 'भेजने वाला (वैकल्पिक) जैसे AX-SBIINB-S या 98765 43210',
   'Check message →': 'मैसेज जाँचें →', Checking: 'जाँच हो रही है', 'Try:': 'आज़माएँ:', Paste: 'पेस्ट करें',
   'Paste a message first.': 'पहले मैसेज डालें।',
+  'or try an example:': 'या कोई उदाहरण आज़माएँ:', 'Obvious scams': 'साफ़ धोखे', 'Subtle scams': 'छिपे हुए धोखे', Genuine: 'असली मैसेज',
   Scam: 'धोखा', 'Be careful': 'सावधान', 'Looks safe': 'सुरक्षित लगता है',
   'Clear signs of fraud. Do not click, call back, pay or share anything.': 'धोखे के साफ़ संकेत। लिंक न दबाएँ, वापस फ़ोन न करें, पैसे या कुछ भी न भेजें।',
   'Some warning signs. Check with the organisation through its official number or app before you act.': 'कुछ चेतावनी संकेत हैं। कुछ करने से पहले संस्था के आधिकारिक नंबर या ऐप से पक्का करें।',
