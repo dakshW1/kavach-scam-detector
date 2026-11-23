@@ -28,6 +28,7 @@ from pydantic import BaseModel, Field  # noqa: E402
 from kavach import diary, intel, report  # noqa: E402
 from kavach.detector import analyze, get_model  # noqa: E402
 from kavach.explain import explain_genuine  # noqa: E402
+from kavach import hindi  # noqa: E402
 from kavach.library import FAMILIES, RECOVERY_COMMON, REPORT_ONLY  # noqa: E402
 from kavach.tricks import TRICKS, disguise  # noqa: E402
 
@@ -41,6 +42,7 @@ class Msg(BaseModel):
     text: str = Field(..., max_length=MAX_LEN)
     sender: str = Field("", max_length=60)
     save: bool = True
+    lang: str = "en"
 
 
 class ReportIn(Msg):
@@ -52,6 +54,9 @@ class ReportIn(Msg):
     debit_time: str = ""
     victim_bank: str = ""
     beneficiary: str = ""
+    customer: str = ""
+    customer_account: str = ""
+    officer: str = ""
     notes: str = Field("", max_length=2000)
     format: str = "pdf"
 
@@ -71,12 +76,24 @@ class SettingsIn(BaseModel):
     auto_delete_days: int | None = None
 
 
+def confidence_band(res) -> str:
+    """Plain words instead of a wall of '>99%': the percentage stays available as a detail."""
+    if any(f.rule == "unreadable_script" for f in res.flags):
+        return "Can't read this language"
+    c = res.confidence
+    if res.verdict == "SCAM":
+        return "Very likely a scam" if c >= 0.95 else "Likely a scam"
+    if res.verdict == "SUSPICIOUS":
+        return "Not sure – some warning signs"
+    return "Very likely genuine" if c >= 0.95 else "Probably genuine" if c >= 0.8 else "Looks genuine – please verify"
+
+
 def result_json(res, saved_id=None) -> dict:
     fam = res.family_info
     return {
         "text": res.text, "cleaned": res.cleaned, "tricks": {k: v for k, v in res.tricks.items() if v},
         "verdict": res.verdict, "p_scam": res.p_scam, "confidence": res.confidence,
-        "confidence_text": report.pct(res.confidence), "category": res.category, "category_probs": res.category_probs,
+        "confidence_text": report.pct(res.confidence), "confidence_band": confidence_band(res), "category": res.category, "category_probs": res.category_probs,
         "unfamiliar": res.unfamiliar, "family": res.family, "family_info": fam,
         "flags": [{"rule": f.rule, "label": f.label, "reason": f.reason, "severity": f.severity,
                    "start": f.start, "end": f.end, "text": f.text} for f in res.flags],
@@ -106,6 +123,9 @@ def api_analyze(m: Msg):
         diary.remember(res)
     out = result_json(res, saved)
     out["previous"] = previous
+    if m.lang == "hi":
+        hindi.translate(out)
+        hindi.translate_family(out)
     return out
 
 
@@ -114,11 +134,15 @@ def api_report(r: ReportIn):
     res = analyze(r.text, r.sender)
     det = report.ReportDetails(sender=r.sender, received=r.received, channel=r.channel, lost_money=r.lost_money,
                                amount_lost=r.amount_lost, transaction_ref=r.transaction_ref, debit_time=r.debit_time,
-                               victim_bank=r.victim_bank, beneficiary=r.beneficiary, notes=r.notes)
+                               victim_bank=r.victim_bank, beneficiary=r.beneficiary, customer=r.customer,
+                               customer_account=r.customer_account, officer=r.officer, notes=r.notes)
     rep = report.build(res, det)
     if r.format == "summary":
         return {"summary": report.complaint_summary(rep), "report_id": rep["report_id"], "sha256": rep["sha256"],
                 "trail": rep["trail"], "family": rep["family"]}
+    if r.format == "slip":
+        return Response(report.slip_text(rep), media_type="text/plain; charset=utf-8",
+                        headers={"Content-Disposition": f'attachment; filename="{report.filename(rep, "slip.txt")}"'})
     if r.format == "txt":
         return Response(report.text_report(rep), media_type="text/plain; charset=utf-8",
                         headers={"Content-Disposition": f'attachment; filename="{report.filename(rep, "txt")}"'})

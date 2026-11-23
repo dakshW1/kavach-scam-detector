@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { api } from '../api.js';
+import { useT } from '../i18n.js';
 
 function Copy({ text }) {
   const [done, setDone] = useState(false);
@@ -12,6 +13,7 @@ function Copy({ text }) {
 }
 
 export function TodoTab({ r }) {
+  const t = useT();
   if (r.verdict === 'SAFE') return (
     <div className="stack">
       <p><b>{r.genuine?.summary}</b></p>
@@ -21,14 +23,14 @@ export function TodoTab({ r }) {
   return (
     <div className="grid-2">
       <div>
-        <h3>If you have NOT paid or shared anything</h3>
+        <h3>{t('If you have NOT paid or shared anything')}</h3>
         <ul className="clean" dangerouslySetInnerHTML={{ __html: r.report_only.map(s => `<li>${md(s)}</li>`).join('') }} />
-        <h3 style={{ marginTop: 22 }}>Protect yourself from this type</h3>
+        <h3 style={{ marginTop: 22 }}>{t('Protect yourself from this type')}</h3>
         <ul className="clean">{(r.advice.protect || []).map((s, i) => <li key={i}>{s}</li>)}</ul>
       </div>
       <div className="night grain" style={{ padding: 24, borderRadius: 20 }}>
         <div style={{ position: 'relative', zIndex: 2 }}>
-          <h3 style={{ color: '#fff' }}>Already paid, clicked or shared a code?</h3>
+          <h3 style={{ color: '#fff' }}>{t('Already paid, clicked or shared a code?')}</h3>
           <ol className="steps" dangerouslySetInnerHTML={{ __html: r.recovery.map(s => `<li>${md(s)}</li>`).join('') }} />
         </div>
       </div>
@@ -44,7 +46,8 @@ export function md(s) {
 
 export function ReportTab({ r, sender, channel }) {
   const [f, setF] = useState({ sender, received: '', channel, lost_money: false, amount_lost: '', transaction_ref: '',
-    debit_time: '', victim_bank: '', beneficiary: '', notes: '' });
+    debit_time: '', victim_bank: '', beneficiary: '', customer: '', customer_account: '', officer: '', notes: '' });
+  const [helper, setHelper] = useState(false);
   const [summary, setSummary] = useState(null);
   const [busy, setBusy] = useState('');
   const set = (k, v) => setF(p => ({ ...p, [k]: v }));
@@ -72,11 +75,20 @@ export function ReportTab({ r, sender, channel }) {
           <label className="field">Paid to (UPI ID / account)<input className="input" placeholder="if you know it" value={f.beneficiary} onChange={e => set('beneficiary', e.target.value)} /></label>
         </motion.div>
       )}
+      <label className="check"><input type="checkbox" checked={helper} onChange={e => setHelper(e.target.checked)} /> I am helping someone else (bank / police / family)</label>
+      {helper && (
+        <div className="grid-3">
+          <label className="field">Customer name<input className="input" value={f.customer} onChange={e => set('customer', e.target.value)} /></label>
+          <label className="field">Account (last 4 digits)<input className="input" maxLength={4} value={f.customer_account} onChange={e => set('customer_account', e.target.value.replace(/[^0-9]/g, ''))} /></label>
+          <label className="field">Checked by (name, branch)<input className="input" value={f.officer} onChange={e => set('officer', e.target.value)} /></label>
+        </div>
+      )}
       <label className="field">Anything else (what happened, when you noticed)<textarea className="textarea" value={f.notes} onChange={e => set('notes', e.target.value)} /></label>
       {f.lost_money && <div className="tag bad" style={{ padding: '10px 14px', fontSize: '.9rem' }}>💸 Money lost: call 1930 now – the first hours matter most.</div>}
       <div className="row">
         <button className="btn" onClick={() => file('pdf')} disabled={!!busy}>{busy === 'pdf' ? 'Preparing…' : '⬇ Download PDF report'}</button>
         <button className="btn ghost" onClick={() => file('txt')} disabled={!!busy}>⬇ Text report</button>
+        <button className="btn ghost" onClick={() => file('slip')} disabled={!!busy} title="One page to print and hand over">🖨 Customer slip</button>
         <button className="btn ghost" onClick={make} disabled={!!busy}>Show complaint text</button>
       </div>
       {summary && (

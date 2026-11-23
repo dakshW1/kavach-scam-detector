@@ -11,6 +11,7 @@ export default function Results() {
   const [m, setM] = useState(null);
   const [priv, setPriv] = useState(null);
   const [showMistakes, setShowMistakes] = useState(false);
+  const [showTable, setShowTable] = useState(false);
   useEffect(() => { api.metrics().then(setM); api.privacy().then(setPriv); }, []);
   if (!m) return null;
   const f = m.final_v2 || m.final;
@@ -24,15 +25,33 @@ export default function Results() {
         <p>Every number is on messages the model never saw during training. Final test v2 was written before the latest fixes and never used to improve the model; the tester and challenge sets were used to find mistakes, so they are less strict.</p>
       </div>
 
-      <div className="grid-4" style={{ marginTop: 20 }}>
-        <div className="stat"><div className="v">{Math.round(f.caught_scam_or_suspicious * 100)}%</div><div className="l">scams caught in the final test ({f.n_scam} scams)</div></div>
-        <div className="stat"><div className="v">{(Math.round(f.accuracy * 1000) / 10).toFixed(1)}%</div><div className="l">accuracy, final test ({f.n} messages)</div></div>
-        <div className="stat"><div className="v">{(Math.round(f.safe_marked_scam * 1000) / 10).toFixed(1)}%</div><div className="l">genuine messages wrongly marked SCAM</div></div>
+      {(() => {
+        // one honest headline: all hand-written / real-user sets together, plus the large held-out set
+        const hand = ['final_v2', 'final', 'challenge', 'tester'].filter(k => m[k]).map(k => m[k]);
+        const sum = fn => hand.reduce((a, s) => a + fn(s), 0);
+        const scams = sum(s => s.n_scam), caught = sum(s => s.verdicts.scam.SCAM + s.verdicts.scam.SUSPICIOUS);
+        const genuine = sum(s => s.n_safe), wrong = sum(s => s.verdicts.safe.SCAM);
+        const t = m.test;
+        return (
+          <div className="headline-claim">
+            On <b>{scams + genuine} hand-written and real-user messages</b> Kavach caught <b>{caught} of {scams} scams</b> and wrongly called{' '}
+            <b>{wrong} of {genuine} genuine messages</b> a scam. On <b>{t.n.toLocaleString('en-IN')} held-out generated messages</b> it caught{' '}
+            <b>{Math.round(t.caught_scam_or_suspicious * 100)}%</b> of scams and wrongly flagged <b>{(t.safe_marked_scam * 100).toFixed(1)}%</b> of genuine ones.
+            <div className="small muted" style={{ marginTop: 6 }}>No set contains real users' private messages; most were written by the team, so real-world accuracy will be lower.</div>
+          </div>
+        );
+      })()}
+
+      <div className="grid-4" style={{ marginTop: 16 }}>
+        <div className="stat"><div className="v">{Math.round(f.caught_scam_or_suspicious * 100)}%</div><div className="l">scams caught in the untouched final test ({f.n_scam} scams)</div></div>
+        <div className="stat"><div className="v">{f.verdicts.safe.SCAM}/{f.n_safe}</div><div className="l">genuine messages wrongly called a scam there</div></div>
+        <div className="stat"><div className="v">{Math.round(m.test.ms_per_message)} ms</div><div className="l">to check one message on a laptop CPU</div></div>
         <div className="stat"><div className="v">{(Math.round(m.calibration_all.ece * 1000) / 1000).toFixed(3)}</div><div className="l">calibration error (0 = perfectly honest confidence)</div></div>
       </div>
 
-      <Reveal>
-        <div className="card table-wrap" style={{ marginTop: 16 }}>
+      <button className="btn ghost" style={{ marginTop: 16 }} onClick={() => setShowTable(v => !v)}>{showTable ? 'Hide' : 'Show'} every test set</button>
+      {showTable && (
+        <div className="card table-wrap" style={{ marginTop: 12 }}>
           <table className="t">
             <thead><tr><th>Test set</th><th>Msgs</th><th>Accuracy</th><th>Scams caught</th><th>Precision</th><th>Recall</th><th>Genuine → SCAM</th><th>Genuine → suspicious</th><th>Category acc.</th></tr></thead>
             <tbody>{['final_v2', 'final', 'tester', 'challenge', 'test'].filter(k => m[k]).map(k => (
@@ -42,7 +61,7 @@ export default function Results() {
             </tbody>
           </table>
         </div>
-      </Reveal>
+      )}
 
       <div className="grid-2" style={{ marginTop: 16 }}>
         <Reveal><div className="card">

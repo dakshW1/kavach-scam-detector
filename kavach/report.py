@@ -38,6 +38,9 @@ class ReportDetails:
     debit_time: str = ""        # when the money left the account
     victim_bank: str = ""       # the bank / app the victim paid from
     beneficiary: str = ""       # UPI ID / account the victim paid to, if known
+    customer: str = ""          # filled in by a bank / police officer helping a customer (optional)
+    customer_account: str = ""  # last digits only
+    officer: str = ""           # officer name and branch / station (optional)
     notes: str = ""
 
     def __post_init__(self):
@@ -48,6 +51,8 @@ class ReportDetails:
                 limit = 2000 if f.name == "notes" else 120
                 v = re.sub(r"[\r\n\t\x00-\x1f]+", " ", v).strip()[:limit]
                 setattr(self, f.name, v)
+        if re.fullmatch(r"[\d,]+(\.\d{1,2})?", self.amount_lost or ""):
+            self.amount_lost = "Rs " + self.amount_lost   # "4500" -> "Rs 4500"
 
 
 def pct(p: float) -> str:
@@ -207,9 +212,13 @@ def complaint_summary(rep: dict) -> str:
     if bad_links:
         parts.append("It contains the link(s) " + ", ".join(l["as_written"] for l in bad_links)
                      + ", which are not official websites of the organisation named.")
-    tactics = [e["title"].lower() for e in rep["evidence"] if e["severity"] in ("high", "medium")]
+    tactics = [e["title"] for e in rep["evidence"] if e["severity"] in ("high", "medium")]
     if tactics:
         parts.append("Warning signs: " + "; ".join(dict.fromkeys(tactics)) + ".")
+    if d.customer or d.officer:
+        parts.append("Reported" + (f" by {d.customer}" if d.customer else "")
+                     + (f" (account ending {d.customer_account})" if d.customer_account else "")
+                     + (f", assisted by {d.officer}" if d.officer else "") + ".")
     if not d.lost_money:
         parts.append("I did not make any payment or share any codes.")
     parts.append(f'Message text: "{rep["message"]}"')
@@ -220,7 +229,12 @@ def text_report(rep: dict) -> str:
     d: ReportDetails = rep["details"]
     L = ["SCAM MESSAGE EVIDENCE REPORT", "=" * 60, f"Generated: {rep['generated']}    Tool: {VERSION} (offline)", ""]
     sections = []
-    sections.append(("SUMMARY", [f"Assessment : {rep['verdict']} ({pct(rep['confidence'])} confidence)",
+    who = []
+    if d.customer:
+        who.append(f"Customer   : {d.customer}" + (f" (account ending {d.customer_account})" if d.customer_account else ""))
+    if d.officer:
+        who.append(f"Assisted by: {d.officer}")
+    sections.append(("SUMMARY", who + [f"Assessment : {rep['verdict']} ({pct(rep['confidence'])} confidence)",
                                  f"Scam type  : {rep['family']}", f"Category   : {rep['category']}"]))
     msg = [f"Channel    : {d.channel or '-'}", f"Sender     : {d.sender or '(not provided)'}",
            f"Received   : {d.received or '(not provided)'}", "Original message (exactly as received):"]
@@ -357,3 +371,26 @@ def pdf_report(rep: dict) -> bytes:
 
 def filename(rep: dict, ext: str) -> str:
     return re.sub(r"[^\w-]", "_", rep["report_id"]) + "." + ext
+
+
+def slip_text(rep: dict) -> str:
+    """One-page customer slip: verdict, 3 reasons, what to do now – for printing at a bank or police desk."""
+    d: ReportDetails = rep["details"]
+    reasons = [e["title"] for e in rep["evidence"]][:3]
+    L = ["KAVACH – SCAM MESSAGE CHECK", "=" * 44,
+         f"Date: {rep['generated']}" + (f"    Customer: {d.customer}" if d.customer else ""), "",
+         f"RESULT: {rep['verdict']}  –  {rep['family']}", ""]
+    if reasons:
+        L.append("Why:")
+        L += [f"  {i}. {r}" for i, r in enumerate(reasons, 1)]
+        L.append("")
+    L += ["What to do now:",
+          "  - Do NOT click the link, call back, pay or share any OTP / PIN.",
+          "  - Lost money? Call 1930 immediately (first hours matter most).",
+          "  - Report at cybercrime.gov.in, or Sanchar Saathi -> Chakshu if no money was lost.",
+          "  - Keep the original message; do not delete it.", ""]
+    if d.officer:
+        L.append(f"Checked by: {d.officer}")
+    L += ["", "Stamp / signature: ______________________", "",
+          f"Ref: {rep['report_id']}  (offline analysis, not a legal finding)"]
+    return "\n".join(L)

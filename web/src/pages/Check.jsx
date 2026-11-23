@@ -13,6 +13,8 @@ import { ReportTab, GuideTab, IntelTab, HoodTab, TodoTab } from '../components/R
 import { GenuineSummary, PassedChecks, StayCareful } from '../components/GenuinePanel.jsx';
 import { api } from '../api.js';
 import { lenis } from '../App.jsx';
+import { useLang, useT } from '../i18n.js';
+import ShareCard from '../components/ShareCard.jsx';
 
 const EXAMPLES = {
   'Fake SBI KYC': ['Dear customer, your SBI account will be blocked today. Update your KYC immediately at https://onlinesbi.sbi.secure-login.top/kyc or call 9876543210.', '9876543210'],
@@ -28,16 +30,17 @@ const when = ts => new Date(ts).toLocaleString('en-IN', { day: 'numeric', month:
 
 // "You have checked this before": same message (fingerprint) or a very similar one (same scam, other number/link)
 function SeenBefore({ p, now }) {
+  const t = useT();
   const same = p.match === 'same';
   const times = p.times_seen + 1;
   return (
     <motion.div className="seen-before" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}>
       <span className="seen-icon">↺</span>
       <div>
-        <b>{same ? 'You have checked this exact message before' : `This is ${Math.round(p.similarity * 100)}% similar to a message you checked before`}</b>
+        <b>{same ? t('You have checked this exact message before') : `${Math.round(p.similarity * 100)}% ${t('similar to a message you checked before')}`}</b>
         <div className="small">
-          First checked {when(p.ts)} – it was marked <b>{p.verdict}</b>{p.category ? ` (${p.category})` : ''}{p.verdict === now ? ', the same as now.' : `; now: ${now}.`}
-          {' '}{p.source === 'diary' ? `Seen ${times} time${times > 1 ? 's' : ''} in total – your diary keeps one entry and counts the repeats.` : 'Remembered for this session only (diary is off).'}
+          {t('First checked')} {when(p.ts)} – {t('it was marked')} <b>{t(p.verdict)}</b>{p.category ? ` (${p.category})` : ''}{p.verdict === now ? `, ${t('the same as now.')}` : `; ${t('now:')} ${t(now)}.`}
+          {' '}{p.source === 'diary' ? `${t('Seen')} ${times} ${t('times in total – your diary keeps one entry and counts the repeats.')}` : t('Remembered for this session only (diary is off).')}
         </div>
         {!same && <div className="small muted" style={{ marginTop: 4 }}>Earlier message: {p.snippet}</div>}
       </div>
@@ -45,10 +48,7 @@ function SeenBefore({ p, now }) {
   );
 }
 
-const RESULT_TABS = [
-  { id: 'todo', label: 'What to do' }, { id: 'report', label: 'Report this scam' },
-  { id: 'guide', label: 'How this scam works' }, { id: 'hood', label: 'For experts' },
-];
+const RESULT_TABS = ['What to do', 'Report this scam', 'How this scam works', 'For experts'].map((label, i) => ({ id: ['todo', 'report', 'guide', 'hood'][i], label }));
 
 export default function Check({ onChange }) {
   const [text, setText] = useState('');
@@ -59,6 +59,17 @@ export default function Check({ onChange }) {
   const [err, setErr] = useState('');
   const [tab, setTab] = useState('todo');
   const [focus, setFocus] = useState(null);   // index of the sign in focus mode (null = off)
+  const { lang } = useLang();
+  const t = useT();
+  const inputRef = useRef(null);
+  const heroRef = useRef(null);
+  useEffect(() => { inputRef.current?.focus({ preventScroll: true }); }, []);
+  // switching language re-explains the current result (without saving it again)
+  useEffect(() => {
+    if (!r) return;
+    api.analyze(r.text, sender, false, lang).then(res => setR(prev => ({ ...res, previous: prev?.previous, saved_to_diary: prev?.saved_to_diary }))).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   // keyboard: Esc leaves focus mode, ← → walk through the signs
   useEffect(() => {
@@ -85,10 +96,10 @@ export default function Check({ onChange }) {
   useEffect(() => { api.metrics().then(setMetrics).catch(() => {}); }, []);
 
   const check = async () => {
-    if (!text.trim()) { setErr('Paste a message first.'); return; }
+    if (!text.trim()) { setErr(t('Paste a message first.')); return; }
     setBusy(true); setErr('');
     try {
-      const res = await api.analyze(text, sender);
+      const res = await api.analyze(text, sender, true, lang);
       setR(res); setTab('todo'); setFocus(null); onChange?.();
       setTimeout(() => {
         if (resultRef.current) {
@@ -100,6 +111,15 @@ export default function Check({ onChange }) {
     setBusy(false);
   };
 
+  const newCheck = () => {
+    setText(''); setSender(''); setR(null); setFocus(null); setErr('');
+    if (lenis) lenis.scrollTo(0, { duration: 0.8 }); else window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 300);
+  };
+  const paste = async () => {
+    try { const clip = await navigator.clipboard.readText(); if (clip) { setText(clip); setErr(''); } } catch { setErr('Press Ctrl+V in the box to paste.'); }
+  };
+
   const pick = name => { const [t, s] = EXAMPLES[name]; setText(t); setSender(s); setErr(''); };
   const fin = metrics?.final_v2 || metrics?.final;
 
@@ -108,25 +128,26 @@ export default function Check({ onChange }) {
       <section className="wrap night grain hero">
         <VantaNet />
         <div className="hero-inner">
-          <ShinyText text="On-device · offline · private" className="eyebrow" color="#8f8d88" shineColor="#ffffff" speed={2.6} />
-          <h1><BlurText text="Is this message a scam?" delay={90} animateBy="words" direction="top" className="blur-text" /></h1>
-          <p className="lede">Paste any SMS or WhatsApp message. <span className="serif">Kavach checks it on this laptop</span> – nothing ever leaves the device.</p>
+          <ShinyText text={t('On-device · offline · private')} className="eyebrow" color="#8f8d88" shineColor="#ffffff" speed={2.6} />
+          <h1><BlurText key={lang} text={t('Is this message a scam?')} delay={90} animateBy="words" direction="top" className="blur-text" /></h1>
+          <p className="lede">{t('Paste any SMS or WhatsApp message.')} <span className="serif">{t('Kavach checks it on this laptop')}</span> {t('– nothing ever leaves the device.')}</p>
 
           <motion.div className="input-card" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
-            <textarea value={text} onChange={e => setText(e.target.value)} placeholder="Paste the message here…"
+            <textarea ref={inputRef} value={text} onChange={e => setText(e.target.value)} placeholder={t('Paste the message here…')}
               onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) check(); }} aria-label="Message to check" />
             <div className="controls">
-              <input className="night-input" value={sender} onChange={e => setSender(e.target.value)} placeholder="Sender (optional) e.g. AX-SBIINB-S or 98765 43210" aria-label="Sender" />
+              <input className="night-input" value={sender} onChange={e => setSender(e.target.value)} placeholder={t('Sender (optional) e.g. AX-SBIINB-S or 98765 43210')} aria-label="Sender" />
               <select className="night-input" value={channel} onChange={e => setChannel(e.target.value)} aria-label="Channel">
                 {['SMS', 'WhatsApp', 'Email', 'Other'].map(c => <option key={c}>{c}</option>)}
               </select>
               <StarBorder as="button" className="go-btn" onClick={check} color="#8fcba8" duration={5} thickness={1} radius={14} disabled={busy}>
-                {busy ? <span className="row" style={{ justifyContent: 'center' }}><span className="spinner" /> Checking</span> : 'Check message →'}
+                {busy ? <span className="row" style={{ justifyContent: 'center' }}><span className="spinner" /> {t('Checking')}</span> : t('Check message →')}
               </StarBorder>
             </div>
             {err && <p className="small" style={{ color: 'var(--glow-bad)', marginTop: 10 }}>{err}</p>}
             <div className="chips">
-              <span className="small muted">Try:</span>
+              <button className="chip paste-chip" onClick={paste} title="Ctrl+V also works">📋 {t('Paste')}</button>
+              <span className="small muted">{t('Try:')}</span>
               {Object.keys(EXAMPLES).map(n => <button key={n} className="chip" onClick={() => pick(n)}>{n}</button>)}
             </div>
           </motion.div>
@@ -137,7 +158,14 @@ export default function Check({ onChange }) {
       <AnimatePresence mode="wait">
         {rv && (
           <motion.section key={rv.text + rv.verdict} className="wrap" style={{ paddingTop: 28 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <div className="sr-only" role="status" aria-live="polite">
+              {`${t(rv.verdict === 'SCAM' ? 'Scam' : rv.verdict === 'SUSPICIOUS' ? 'Be careful' : 'Looks safe')}. ${rv.confidence_band}. ${rv.family_info && rv.verdict !== 'SAFE' ? rv.family_info.title : ''}`}
+            </div>
             <VerdictCard r={rv} onReport={openReport} />
+            <div className="row result-actions">
+              <button className="btn ghost" onClick={newCheck}>↺ {t('Check another message')}</button>
+              <ShareCard r={rv} />
+            </div>
             {rv.previous && <SeenBefore p={rv.previous} now={rv.verdict} />}
             {r.saved_to_diary && !r.saved_to_diary.updated && <p className="small muted" style={{ margin: '10px 4px 0' }}>📔 Saved to your Scam Diary (masked: no numbers, codes or clickable links).</p>}
             <AnimatePresence>
@@ -148,16 +176,16 @@ export default function Check({ onChange }) {
             </AnimatePresence>
             <div className={`grid-2 result-grid ${focus != null ? 'focusing' : ''}`} style={{ marginTop: 20 }}>
               <div className="card message-card">
-                <div className="kicker">The message · tap a highlight to see why</div>
+                <div className="kicker">{t('The message · tap a highlight to see why')}</div>
                 <HighlightedMessage r={rv} focus={focus} onPick={setFocus} />
                 <Legend />
                 <Decoded r={rv} />
-                {rv.links.length > 0 && (<div style={{ marginTop: 22 }}><div className="kicker">Links – checked, never opened</div><LinkCards r={rv} /></div>)}
+                {rv.links.length > 0 && (<div style={{ marginTop: 22 }}><div className="kicker">{t('Links – checked, never opened')}</div><LinkCards r={rv} /></div>)}
               </div>
               <div>
                 <div className="kicker" style={{ margin: '6px 4px 12px' }}>
                   {(() => { const bad = rv.flags.filter(f => f.severity !== 'good').length; const ok = rv.flags.length - bad;
-                    return [bad && `${bad} warning sign${bad > 1 ? 's' : ''}`, ok && `${ok} good sign${ok > 1 ? 's' : ''}`].filter(Boolean).join(' · ') || 'Why?'; })()}
+                    return [bad && `${bad} ${t(bad > 1 ? 'warning signs' : 'warning sign')}`, ok && `${ok} ${t('good signs')}`].filter(Boolean).join(' · ') || ''; })()}
                 </div>
                 {rv.verdict === 'SAFE' && <GenuineSummary g={rv.genuine} />}
                 <FlagList r={rv} focus={focus} onPick={setFocus} />
@@ -167,7 +195,7 @@ export default function Check({ onChange }) {
               </div>
             </div>
             <div style={{ marginTop: 28 }} ref={tabsRef}>
-              <Tabs tabs={RESULT_TABS} active={tab} onChange={setTab} id="result" />
+              <Tabs tabs={RESULT_TABS.map(x => ({ ...x, label: t(x.label) }))} active={tab} onChange={setTab} id="result" />
               <AnimatePresence mode="wait">
                 <motion.div key={tab} className="card" style={{ marginTop: 14 }} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.25 }}>
                   {tab === 'todo' && <TodoTab r={r} />}

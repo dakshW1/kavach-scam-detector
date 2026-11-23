@@ -14,7 +14,7 @@ async function call(method, path, body) {
 }
 
 export const api = {
-  analyze: (text, sender, save = true) => call('POST', '/api/analyze', { text, sender, save }).then(r => r.json()),
+  analyze: (text, sender, save = true, lang = 'en') => call('POST', '/api/analyze', { text, sender, save, lang }).then(r => r.json()),
   privacy: () => call('GET', '/api/privacy').then(r => r.json()),
   library: () => call('GET', '/api/library').then(r => r.json()),
   metrics: () => call('GET', '/api/metrics').then(r => r.json()),

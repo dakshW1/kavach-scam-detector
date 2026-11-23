@@ -4,6 +4,8 @@ import { SEVERITY, TIPS } from './signTips.js';
 import { lenis } from '../App.jsx';
 import DecryptedText from '../reactbits/DecryptedText.jsx';
 import { pct } from '../api.js';
+import { useLang, useT } from '../i18n.js';
+import { TIPS_HI } from './signTips.js';
 
 const VERDICT = {
   SCAM: { word: 'Scam', sub: 'Clear signs of fraud. Do not click, call back, pay or share anything.' },
@@ -25,6 +27,7 @@ export function mergeFlags(flags) {
 }
 
 export function VerdictCard({ r, onReport }) {
+  const t = useT();
   const v = VERDICT[r.verdict];
   const type = r.verdict !== 'SAFE' && r.family_info && r.family !== 'unknown'
     ? `${r.family_info.icon} ${r.family_info.title}` : r.verdict !== 'SAFE' ? (r.category === 'Other' ? 'New or unusual type of scam' : r.category) : null;
@@ -36,21 +39,21 @@ export function VerdictCard({ r, onReport }) {
         <div className="verdict-grid">
           <div>
             {type && <div className="row" style={{ marginBottom: 14 }}><span className="tag night-tag">{type}</span></div>}
-            <div className="verdict-word">{v.word}</div>
-            <p className="sub">{v.sub}</p>
+            <div className="verdict-word">{t(v.word)}</div>
+            <p className="sub">{t(v.sub)}</p>
             {r.safety_net && <p className="small" style={{ marginTop: 10, color: 'var(--glow-warn)' }}>{r.safety_net}</p>}
           </div>
           <div className="conf">
-            <div className="muted small" style={{ fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>How sure Kavach is</div>
-            <div className="big">{pct(r.confidence)}</div>
-            <div className="small muted" style={{ marginTop: 6 }}>Checked on this computer – nothing was sent anywhere</div>
+            <div className="muted small" style={{ fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>{t('How sure Kavach is')}</div>
+            <div className="band">{r.confidence_band}</div>
+            <div className="small muted" style={{ marginTop: 6 }}>{t('model score')} {pct(r.confidence)} · {t('Checked on this computer – nothing was sent anywhere')}</div>
           </div>
         </div>
       </motion.div>
       {r.verdict !== 'SAFE' && (
         <motion.div className="help-strip" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
-          <span><b>Already paid or shared a code?</b> Call <b className="num">1930</b> now – the first hours matter most. Then call your bank.</span>
-          <button className="btn small" onClick={onReport}>Make a report</button>
+          <span><b>{t('Already paid or shared a code?')}</b> {t('Call')} <b className="num">1930</b> {t('now – the first hours matter most. Then call your bank.')}</span>
+          <button className="btn small" onClick={onReport}>{t('Make a report')}</button>
         </motion.div>
       )}
     </>
@@ -71,7 +74,8 @@ export function HighlightedMessage({ r, focus = null, onPick }) {
     const on = focus === s.idx;
     parts.push(
       <motion.mark key={`m${k}`} className={`${s.severity} ${onPick ? 'pickable' : ''} ${on ? 'is-focus' : ''}`}
-        title={onPick ? `${s.label} – click for details` : s.reason}
+        title={onPick ? `${s.label} – click for details` : s.reason} data-sym={s.severity === 'good' ? '✓' : s.severity === 'high' ? '!' : '?'}
+        aria-label={`${s.severity === 'good' ? 'Good sign' : s.severity === 'high' ? 'Danger sign' : 'Warning sign'} ${s.idx + 1}: ${r.text.slice(s.start, s.end)} – ${s.label}`}
         role={onPick ? 'button' : undefined} tabIndex={onPick ? 0 : undefined}
         onClick={onPick ? e => { e.stopPropagation(); onPick(on ? null : s.idx); } : undefined}
         onKeyDown={onPick ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(on ? null : s.idx); } } : undefined}
@@ -88,17 +92,21 @@ export function HighlightedMessage({ r, focus = null, onPick }) {
 }
 
 export function Legend() {
+  const t = useT();
   return (
     <div className="legend">
-      <span><i style={{ background: 'var(--bad-soft)', boxShadow: 'inset 0 -2px 0 var(--bad)' }} />! danger sign</span>
-      <span><i style={{ background: 'var(--warn-soft)', boxShadow: 'inset 0 -2px 0 var(--warn)' }} />? be careful</span>
-      <span><i style={{ background: 'var(--ok-soft)', boxShadow: 'inset 0 -2px 0 var(--ok)' }} />✓ good sign</span>
+      <span><i style={{ background: 'var(--bad-soft)', boxShadow: 'inset 0 -2px 0 var(--bad)' }} />! {t('danger sign')}</span>
+      <span><i style={{ background: 'var(--warn-soft)', boxShadow: 'inset 0 -2px 0 var(--warn)' }} />? {t('be careful')}</span>
+      <span><i style={{ background: 'var(--ok-soft)', boxShadow: 'inset 0 -2px 0 var(--ok)' }} />✓ {t('good sign')}</span>
     </div>
   );
 }
 
 export function FlagList({ r, focus = null, onPick }) {
   const refs = useRef([]);
+  const t = useT();
+  const { lang } = useLang();
+  const tips = lang === 'hi' ? TIPS_HI : TIPS;
   // when a sign comes into focus, glide its card into the middle of the screen
   useEffect(() => {
     const el = focus != null && refs.current[focus];
@@ -140,23 +148,23 @@ export function FlagList({ r, focus = null, onPick }) {
                     <span className={`tag ${sev.tone}`} style={{ marginTop: 10 }}>{f.severity === 'good' ? '✓' : '!'} {sev.label}</span>
                     {f.text.trim() && <div className="focus-quote">“{f.text}”</div>}
                     <div className="focus-row">
-                      <div className="focus-k">{f.severity === 'good' ? 'Why it is reassuring' : 'Why it is a threat'}</div>
+                      <div className="focus-k">{t(f.severity === 'good' ? 'Why it is reassuring' : 'Why it is a threat')}</div>
                       <p>{f.reason}</p>
                     </div>
-                    {TIPS[f.rule] && f.severity !== 'good' && (
+                    {tips[f.rule] && f.severity !== 'good' && (
                       <div className="focus-row genuine">
-                        <div className="focus-k">What a genuine message does instead</div>
-                        <p>{TIPS[f.rule]}</p>
+                        <div className="focus-k">{t('What a genuine message does instead')}</div>
+                        <p>{tips[f.rule]}</p>
                       </div>
                     )}
-                    {TIPS[f.rule] && f.severity === 'good' && (
-                      <div className="focus-row genuine"><div className="focus-k">In plain words</div><p>{TIPS[f.rule]}</p></div>
+                    {tips[f.rule] && f.severity === 'good' && (
+                      <div className="focus-row genuine"><div className="focus-k">{t('In plain words')}</div><p>{tips[f.rule]}</p></div>
                     )}
                     <div className="row" style={{ marginTop: 14, gap: 8 }}>
-                      <button className="btn small ghost" onClick={e => { e.stopPropagation(); onPick((i - 1 + n) % n); }}>← Previous</button>
-                      <button className="btn small ghost" onClick={e => { e.stopPropagation(); onPick((i + 1) % n); }}>Next →</button>
-                      <button className="btn small" onClick={e => { e.stopPropagation(); onPick(null); }}>Done</button>
-                      <span className="small muted">{i + 1} of {n} · ← → keys · Esc</span>
+                      <button className="btn small ghost" onClick={e => { e.stopPropagation(); onPick((i - 1 + n) % n); }}>{t('← Previous')}</button>
+                      <button className="btn small ghost" onClick={e => { e.stopPropagation(); onPick((i + 1) % n); }}>{t('Next →')}</button>
+                      <button className="btn small" onClick={e => { e.stopPropagation(); onPick(null); }}>{t('Done')}</button>
+                      <span className="small muted">{i + 1} / {n}</span>
                     </div>
                   </motion.div>
                 ) : (
@@ -171,7 +179,7 @@ export function FlagList({ r, focus = null, onPick }) {
       })}
       {n > LIMIT && !(focus != null && focus >= LIMIT) && (
         <button className="btn small ghost" style={{ alignSelf: 'flex-start' }} onClick={() => setAll(a => !a)}>
-          {all ? 'Show fewer' : `Show ${n - LIMIT} more sign${n - LIMIT > 1 ? 's' : ''}`}
+          {all ? t('Show fewer') : `+ ${n - LIMIT} ${t('more')}`}
         </button>
       )}
     </div>

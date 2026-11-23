@@ -120,7 +120,7 @@ export default function Diary({ onChange }) {
                     <div className="row" style={{ gap: 8 }}>
                       <span className={`tag ${e.verdict === 'SCAM' ? 'bad' : 'warn'}`}>{e.verdict}</span>
                       <b>{e.category || 'Other'}</b><span className="small muted">{e.ts.replace('T', ' ')} · scam probability {pct(e.confidence)}</span>
-                      {(e.times_seen || 1) > 1 && <span className="tag info">received ×{e.times_seen} · last {(e.last_seen || e.ts).replace('T', ' ').slice(0, 16)}</span>}
+                      {(e.times_seen || 1) > 1 && <span className="tag info">Received {e.times_seen} times · last {(e.last_seen || e.ts).replace('T', ' ').slice(0, 16)}</span>}
                     </div>
                     <p className="small" style={{ marginTop: 8, color: 'var(--ink-2)' }}>{e.snippet}</p>
                     {e.flags.length > 0 && <p className="small muted" style={{ marginTop: 4 }}>Signs: {e.flags.join(', ')}</p>}

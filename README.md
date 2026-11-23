@@ -93,11 +93,11 @@ Every number is on messages the model never saw during training (from `results/m
 
 | Test set | Messages | Accuracy | Scams caught (SCAM or SUSPICIOUS) | Genuine marked SCAM | Genuine marked SUSPICIOUS | Category accuracy |
 |---|---|---|---|---|---|---|
-| **Final test v2** (hand-written before the v2 fixes, never used to improve the model) | 68 | 98.5% | 34/35 | 0/33 | 3/33 | 97.1% |
-| Final test v1 (hand-written before the first tuning) | 72 | 97.2% | 37/37 | 1/35 | 1/35 | 91.9% |
-| Messages typed by 5 persona testers (used for error analysis) | 137 | 97.8% | 83/83 | 2/54 | 0/54 | 94.0% |
-| Challenge set (hand-written, used for error analysis) | 101 | 96.0% | 53/53 | 1/48 | 2/48 | 86.8% |
-| Held-out templates + UCI messages (split by template) | 1,423 | 97.5% | 558/571 | 1/852 | 10/852 | 96.8% |
+| **Final test v2** (hand-written before the v2 fixes, never used to improve the model) | 68 | 95.6% | 34/35 | 2/33 | 0/33 | 97.1% |
+| Final test v1 (hand-written before the first tuning) | 72 | 98.6% | 37/37 | 1/35 | 2/35 | 97.3% |
+| Messages typed by 5 persona testers, round 1 (used for error analysis) | 137 | 98.5% | 83/83 | 2/54 | 0/54 | 90.4% |
+| Challenge set (hand-written, used for error analysis) | 101 | 98.0% | 53/53 | 2/48 | 1/48 | 86.8% |
+| Held-out templates + UCI messages (split by template) | 1,551 | 99.4% | 610/617 | 0/934 | 14/934 | 89.0% |
 
 - **Real delivery OTPs, bank alerts and OTPs (final test v2):** none marked SCAM or SUSPICIOUS.
 - **Chain forwards and hoaxes:** both hoaxes in the tester set are flagged, not called SAFE.
@@ -110,6 +110,44 @@ Every number is on messages the model never saw during training (from `results/m
 **Read these numbers with care.** Much of the Indian training data is generated from templates. The hand-written sets
 are small (68–137 messages), so each message moves the percentages by 1–3 points. Real-world accuracy will probably be
 lower. The remaining mistakes are listed on the app's "How accurate is it?" page.
+
+**In one line:** across all 378 hand-written and real-user messages, Kavach caught 207 of 208 scams and wrongly called
+7 of 170 genuine messages a scam.
+
+The untouched final test v2 moved from 0 to 2 genuine messages called SCAM after the v3 changes. That set is kept
+untouched, so the model was not tuned to get those two back.
+
+### What changed in v3 (second round of five persona testers)
+
+A shopkeeper, a student, a bank helpdesk officer, a jury member and a low-vision user tried v2.
+
+- **Scams that passed as safe:**
+  - "Scan the QR / enter your PIN / approve the request to receive money" in Hinglish and Hindi.
+  - Exam-fee and hall-ticket scams.
+  - "Buy a product first" brand collaborations.
+  - Fake e-mandate "click to cancel" links.
+- **Unreadable languages:** messages written mostly in a language the model cannot read (Malayalam, Tamil...) are now
+  never called safe. Kavach says it cannot read them and caps its confidence at 60%.
+- **Genuine messages that were flagged:**
+  - "No fee at any stage" job invites.
+  - Postal PIN codes.
+  - Delivery, return and ride codes.
+  - "No hurry" money requests from friends.
+  - Problems that were already solved.
+- **Explanations:**
+  - Order updates are no longer called bank alerts.
+  - A branch KYC reminder no longer shows a red KYC flag.
+  - "Does not ask for money or codes" is never claimed when the message does.
+- **Website:**
+  - Plain confidence bands ("Very likely a scam", "Probably genuine"), with the percentage as a small detail.
+  - A full Hindi mode.
+  - Paste button, autofocus, "Check another message" and a WhatsApp-ready share card.
+  - Accessibility: !/?/✓ symbols inside highlights, stronger text contrast, dim-only focus mode, screen-reader
+    announcements, and reduced motion when the system asks for it.
+  - A one-page customer slip and helper fields for bank or police staff.
+  - One honest headline on the accuracy page.
+- **Method:** the train/test split now depends only on a hash of each template's id, so adding templates can no longer
+  reshuffle the test set.
 
 ### What changed in v2, and why
 

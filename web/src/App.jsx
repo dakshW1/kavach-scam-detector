@@ -13,6 +13,7 @@ import Fool from './pages/Fool.jsx';
 import Batch from './pages/Batch.jsx';
 import Results from './pages/Results.jsx';
 import { api } from './api.js';
+import { LangContext } from './i18n.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,6 +37,9 @@ export let lenis = null;
 export default function App() {
   const [page, setPage] = useState(pageFromHash);
   const [privacy, setPrivacy] = useState(null);
+  const [lang, setLangState] = useState(() => { try { return localStorage.getItem('kavach-lang') || 'en'; } catch { return 'en'; } });
+  useEffect(() => { document.documentElement.lang = lang === 'hi' ? 'hi' : 'en'; }, [lang]);
+  const setLang = l => { setLangState(l); try { localStorage.setItem('kavach-lang', l); } catch { /* ok */ } document.documentElement.lang = l === 'hi' ? 'hi' : 'en'; };
   const lenisRef = useRef(null);
 
   // Lenis smooth scrolling, driven by GSAP's ticker so ScrollTrigger animations stay in sync.
@@ -75,7 +79,7 @@ export default function App() {
 
   const Page = PAGES.find(p => p.id === page).comp;
   return (
-    <>
+    <LangContext.Provider value={{ lang, setLang }}>
       <Nav page={page} go={go} privacy={privacy} />
       <AnimatePresence mode="wait">
         <motion.main
@@ -89,6 +93,6 @@ export default function App() {
         </motion.main>
       </AnimatePresence>
       <Footer go={go} />
-    </>
+    </LangContext.Provider>
   );
 }

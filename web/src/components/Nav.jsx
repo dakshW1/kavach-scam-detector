@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { PAGES } from '../App.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
+import { useLang } from '../i18n.js';
 
 export function Logo() {
   return (
@@ -28,6 +29,7 @@ export default function Nav({ page, go, privacy }) {
   useClickOutside(ref, () => setOpen(false));
   useClickOutside(moreRef, () => setMore(false));
   const blocked = privacy?.guard;
+  const { lang, setLang } = useLang();
   const main = PAGES.filter(p => p.main);
   const extra = PAGES.filter(p => !p.main);
   const inExtra = extra.some(p => p.id === page);
@@ -62,6 +64,9 @@ export default function Nav({ page, go, privacy }) {
           </AnimatePresence>
         </div>
       </div>
+      <button className="lang-toggle" onClick={() => setLang(lang === 'hi' ? 'en' : 'hi')} aria-label={lang === 'hi' ? 'Switch to English' : 'हिंदी में देखें'}>
+        {lang === 'hi' ? 'English' : 'हिंदी'}
+      </button>
       <ThemeToggle />
       <div ref={ref} style={{ position: 'relative' }}>
         <button className="privacy-pill" onClick={() => setOpen(o => !o)} aria-expanded={open}>
