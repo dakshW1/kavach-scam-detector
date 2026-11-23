@@ -174,15 +174,23 @@ export function IntelTab({ r, sender, onChange }) {
 }
 
 export function HoodTab({ r }) {
-  const probs = Object.entries(r.category_probs).sort((a, b) => b[1] - a[1]);
+  // The category model is trained on scams only, so its numbers mean "if this is a scam, which type?" and always
+  // add up to 100%. For a safe message that would read as "Lottery 52%", so show the overall chance instead:
+  // P(scam) x P(type | scam), which is close to 0 for every type.
+  const safe = r.verdict === 'SAFE';
+  const probs = Object.entries(r.category_probs).map(([c, p]) => [c, safe ? p * r.p_scam : p]).sort((a, b) => b[1] - a[1]);
+  const show = p => (safe && p > 0 && p < 0.005 ? '<1%' : `${Math.round(p * 100)}%`);
   return (
     <div className="grid-2">
       <div className="stack">
-        <div><div className="kicker">Category probabilities</div>
+        <div><div className="kicker">{safe ? 'Chance it is each type of scam' : 'Which type of scam (if it is one)'}</div>
+          <p className="small muted" style={{ marginBottom: 8 }}>{safe
+            ? 'The type model only matters when a message looks like a scam. Here the scam chance is tiny, so every type is close to 0%.'
+            : 'A second model, trained only on scams, picks the type. Below 45% for every type, Kavach says "Other".'}</p>
           <div className="bars">{probs.map(([c, p], i) => (
             <div key={c} className="bar-row"><span>{c}</span>
               <div className="bar-track"><motion.div className="bar-fill" initial={{ width: 0 }} animate={{ width: `${p * 100}%` }} transition={{ delay: i * 0.06, duration: 0.8 }} /></div>
-              <span className="small">{Math.round(p * 100)}%</span></div>))}
+              <span className="small">{show(p)}</span></div>))}
           </div>
         </div>
         <p className="small muted">Calibrated scam probability {r.p_scam.toFixed(3)} · checked in {Math.round(r.ms)} ms, fully offline.
