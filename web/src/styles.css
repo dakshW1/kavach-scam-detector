@@ -447,3 +447,7 @@ body, .card, .stat, .flag, .nav, .tabs, .input, .select, .textarea, .link-card, 
 .seen-before { display: flex; gap: 12px; align-items: flex-start; margin-top: 12px; padding: 14px 18px; border-radius: 18px; background: var(--info-soft); color: var(--ink); }
 .seen-icon { flex: none; width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; background: var(--info); color: #fff; font-weight: 800; }
 :root[data-theme="dark"] .seen-icon { color: #141414; }
+
+/* SpotlightCard "light" theme hard-codes a white surface: follow our theme tokens instead (fixes dark mode) */
+.spot.card { --spotlight-card-surface: var(--surface); background-color: var(--surface); color: var(--ink); }
+.spot.card h3 { color: var(--ink); }
