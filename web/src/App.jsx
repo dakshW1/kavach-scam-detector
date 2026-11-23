@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -61,8 +61,6 @@ export default function App() {
   useEffect(() => {
     const onHash = () => {
       setPage(pageFromHash());
-      if (lenisRef.current) lenisRef.current.scrollTo(0, { immediate: true });
-      else window.scrollTo(0, 0);
     };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
@@ -71,28 +69,32 @@ export default function App() {
   const go = id => {
     if (id === page) return;
     window.location.hash = `#/${id}`;
-    if (lenisRef.current) lenisRef.current.scrollTo(0, { immediate: true });
-    else window.scrollTo(0, 0);
   };
 
-  useEffect(() => { setTimeout(() => ScrollTrigger.refresh(), 600); }, [page]);
+  // jump to the top only once the old page has faded out (no visible jump), then re-measure scroll reveals
+  const onPageSwap = () => {
+    if (lenisRef.current) lenisRef.current.scrollTo(0, { immediate: true }); else window.scrollTo(0, 0);
+    ScrollTrigger.refresh();
+  };
 
   const Page = PAGES.find(p => p.id === page).comp;
   return (
     <LangContext.Provider value={{ lang, setLang }}>
+     <MotionConfig reducedMotion="user">
       <Nav page={page} go={go} privacy={privacy} />
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" onExitComplete={onPageSwap}>
         <motion.main
           key={page}
-          initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)', transitionEnd: { filter: 'none', transform: 'none' } }}
-          exit={{ opacity: 0, y: -12, filter: 'blur(4px)' }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0, transitionEnd: { transform: 'none' } }}
+          exit={{ opacity: 0, transition: { duration: 0.18, ease: [0.4, 0, 1, 1] } }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
           <Page go={go} onChange={refreshPrivacy} />
         </motion.main>
       </AnimatePresence>
       <Footer go={go} />
+     </MotionConfig>
     </LangContext.Provider>
   );
 }

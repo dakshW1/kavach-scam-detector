@@ -7,6 +7,26 @@ import { pct } from '../api.js';
 import { useLang, useT } from '../i18n.js';
 import { TIPS_HI } from './signTips.js';
 
+const EASE = [0.22, 1, 0.36, 1];
+const ARRIVE = 0.5;   // the page scrolls to the result first (~0.7 s); the verdict plays as it lands
+
+// counts a percentage up from 0 once, e.g. ">99%" or "87%"
+function CountUp({ value, delay = 0 }) {
+  const m = /^([^\d]*)(\d+)(.*)$/.exec(value || '');
+  const [n, setN] = useState(m ? 0 : null);
+  useEffect(() => {
+    if (!m) return undefined;
+    const target = +m[2];
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setN(target); return undefined; }
+    let raf; let t0;
+    const tick = ts => { t0 ??= ts + delay * 1000; const k = Math.min(1, Math.max(0, (ts - t0) / 800)); setN(Math.round(target * (1 - Math.pow(1 - k, 3)))); if (k < 1) raf = requestAnimationFrame(tick); };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+  return m ? <span className="num">{n === +m[2] ? m[1] : ''}{n}{m[3]}</span> : value;
+}
+
 const VERDICT = {
   SCAM: { word: 'Scam', sub: 'Clear signs of fraud. Do not click, call back, pay or share anything.' },
   SUSPICIOUS: { word: 'Be careful', sub: 'Some warning signs. Check with the organisation through its official number or app before you act.' },
@@ -34,24 +54,31 @@ export function VerdictCard({ r, onReport }) {
   return (
     <>
       <motion.div className={`verdict night grain ${r.verdict}`} initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-        <div className="glow" />
+        animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE, delay: ARRIVE - 0.3 }}>
+        {/* the glow spreads out from behind the word: red for a scam, a calm green breath for safe */}
+        <motion.div className="glow" initial={{ opacity: 0, scale: 0.55 }} animate={{ opacity: 0.45, scale: 1 }}
+          transition={{ delay: ARRIVE, duration: r.verdict === 'SAFE' ? 1.6 : 1.1, ease: EASE }} />
         <div className="verdict-grid">
           <div>
-            {type && <div className="row" style={{ marginBottom: 14 }}><span className="tag night-tag">{type}</span></div>}
-            <div className="verdict-word">{t(v.word)}</div>
-            <p className="sub">{t(v.sub)}</p>
-            {r.safety_net && <p className="small" style={{ marginTop: 10, color: 'var(--glow-warn)' }}>{r.safety_net}</p>}
+            {type && <motion.div className="row" style={{ marginBottom: 14 }} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: ARRIVE + 0.45, duration: 0.4, ease: EASE }}><span className="tag night-tag">{type}</span></motion.div>}
+            {/* the verdict lands like a stamp; a safe message just settles in */}
+            <motion.div className="verdict-word" initial={r.verdict === 'SAFE' ? { opacity: 0, y: 14 } : { opacity: 0, scale: 1.3, filter: 'blur(10px)' }}
+              animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', transitionEnd: { filter: 'none' } }}
+              transition={r.verdict === 'SAFE' ? { delay: ARRIVE + 0.05, duration: 0.7, ease: EASE } : { delay: ARRIVE + 0.05, type: 'spring', stiffness: 260, damping: 20 }}
+              style={{ transformOrigin: 'left center' }}>{t(v.word)}</motion.div>
+            <motion.p className="sub" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: ARRIVE + 0.5, duration: 0.45, ease: EASE }}>{t(v.sub)}</motion.p>
+            {r.safety_net && <motion.p className="small" style={{ marginTop: 10, color: 'var(--glow-warn)' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: ARRIVE + 0.6 }}>{r.safety_net}</motion.p>}
           </div>
-          <div className="conf">
+          <motion.div className="conf" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: ARRIVE + 0.4, duration: 0.45, ease: EASE }}>
             <div className="muted small" style={{ fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>{t('How sure Kavach is')}</div>
             <div className="band">{r.confidence_band}</div>
-            <div className="small muted" style={{ marginTop: 6 }}>{t('model score')} {pct(r.confidence)} · {t('Checked on this computer – nothing was sent anywhere')}</div>
-          </div>
+            <div className="small muted" style={{ marginTop: 6 }}>{t('model score')} <CountUp value={pct(r.confidence)} delay={ARRIVE + 0.4} /> · {t('Checked on this computer – nothing was sent anywhere')}</div>
+          </motion.div>
         </div>
       </motion.div>
       {r.verdict !== 'SAFE' && (
-        <motion.div className="help-strip" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
+        <motion.div className="help-strip" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: ARRIVE + 0.75, duration: 0.45, ease: EASE }}>
           <span><b>{t('Already paid or shared a code?')}</b> {t('Call')} <b className="num">1930</b> {t('now – the first hours matter most. Then call your bank.')}</span>
           <button className="btn small" onClick={onReport}>{t('Make a report')}</button>
         </motion.div>
@@ -62,6 +89,8 @@ export function VerdictCard({ r, onReport }) {
 
 // Each highlight is a button: clicking it puts that sign in focus (see FlagList and .focusing in styles.css).
 export function HighlightedMessage({ r, focus = null, onPick }) {
+  const mounted = useRef(false);
+  useEffect(() => { const id = setTimeout(() => { mounted.current = true; }, 50); return () => clearTimeout(id); }, []);
   const spans = [];
   r.flags.forEach((f, i) => { if (f.end > f.start) spans.push({ ...f, idx: i }); });
   const chosen = [];
@@ -79,8 +108,10 @@ export function HighlightedMessage({ r, focus = null, onPick }) {
         role={onPick ? 'button' : undefined} tabIndex={onPick ? 0 : undefined}
         onClick={onPick ? e => { e.stopPropagation(); onPick(on ? null : s.idx); } : undefined}
         onKeyDown={onPick ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(on ? null : s.idx); } } : undefined}
-        initial={{ opacity: 0.4 }} animate={{ opacity: focus != null && !on ? 0.3 : 1, scale: on ? 1.06 : 1 }}
-        transition={{ delay: on ? 0 : 0.25 + k * 0.12, duration: 0.35, type: on ? 'spring' : 'tween', stiffness: 400, damping: 18 }}>
+        initial={{ opacity: 0.5, backgroundSize: '0% 100%' }} animate={{ opacity: focus != null && !on ? 0.3 : 1, scale: on ? 1.06 : 1, backgroundSize: '100% 100%' }}
+        transition={on ? { type: 'spring', stiffness: 400, damping: 18 }
+          : mounted.current ? { duration: 0.25 }
+            : { delay: ARRIVE + 0.35 + k * 0.12, duration: 0.45, ease: EASE }}>
         {r.text.slice(s.start, s.end)}
       </motion.mark>,
       <sup key={`s${k}`}>{s.idx + 1}</sup>,
@@ -137,7 +168,7 @@ export function FlagList({ r, focus = null, onPick }) {
             role={onPick ? 'button' : undefined} tabIndex={onPick && !on ? 0 : undefined}
             onKeyDown={onPick ? e => { if (!on && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onPick(i); } } : undefined}
             initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: focus == null ? 0.15 + i * 0.07 : 0, duration: 0.45, ease: [0.22, 1, 0.36, 1], layout: { duration: 0.35 } }}>
+            transition={{ delay: focus == null ? ARRIVE + 0.5 + i * 0.07 : 0, duration: 0.45, ease: EASE, layout: { duration: 0.35 } }}>
             <span className="n">{i + 1}</span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <b>{f.label} {!on && f.text.trim() && <q>{f.text.slice(0, 70)}</q>}</b>
@@ -190,7 +221,7 @@ const LINK_TAG = { dangerous: 'bad', suspicious: 'warn', official: 'ok', unknown
 
 export function LinkCards({ r }) {
   return r.links.map((l, i) => (
-    <motion.div key={i} className="link-card" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.1 }}>
+    <motion.div key={i} className="link-card" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: ARRIVE + 0.6 + i * 0.1, duration: 0.45, ease: EASE }}>
       <div className="row" style={{ gap: 10 }}>
         <span className={`tag ${LINK_TAG[l.verdict]}`}>{l.verdict.toUpperCase()}</span>
         <code>{l.defanged}</code>
