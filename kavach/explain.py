@@ -9,7 +9,15 @@ A scam verdict is explained by red flags. A safe verdict is explained by three t
 """
 from __future__ import annotations
 
+import re
+
+from .normalize import normalize
+
 S, D = {"asks_secret"}, {"asks_details"}
+# words that show a message asks for money or a code, even when no red-flag rule fired
+MONEY_WORDS = re.compile(r"\b(pay|paid to|transfer|send (me |us )?(rs|₹|inr|money|\d)|bhej\w*|jama kar\w*|baaki|due amount|amount due|"
+                         r"[\w.\-]+@(ok\w+|ybl|ibl|axl|paytm|upi)\b)|भेज|भुगतान")
+CODE_WORDS = re.compile(r"\b(otp|pin|cvv|password|verification code|the code)\b|ओटीपी|पिन")
 MONEY = {"fee", "money_demand", "collect_request"}
 MOBILE = {"personal_mobile", "sender_mobile"}
 
@@ -81,10 +89,13 @@ DISGUISE_DOMAINS = {"bank", "otp", "offer", "service", "general"}
 # genuine-message type, decided by the good signs found (first match wins)
 TYPES = [
     ({"handover_code"}, "delivery", "a delivery or ride code", "It gives YOU a code to show the delivery agent or driver in person, and asks for nothing else."),
-    ({"masked_account", "transaction_ref"}, "bank", "a bank transaction alert", "It reports a transaction with a masked account number and a reference, and asks you for nothing."),
-    ({"otp_dont_share", "valid_for"}, "otp", "a one-time password (OTP) message", "It gives you a code for something you started yourself and warns you not to share it."),
-    ({"awareness"}, "awareness", "a fraud-awareness message", "It warns about fraud and points to official channels without asking you for anything."),
+    ({"masked_account"}, "bank", "a bank transaction alert", "It reports a transaction with a masked account number and asks you for nothing."),
+    ({"order_update"}, "delivery", "an order or delivery update", "It tells you about an order you placed and asks for no payment or details."),
     ({"visit_branch"}, "service", "a service reminder from an organisation", "It sends you to the branch or the official app instead of a link or a phone number."),
+    ({"awareness"}, "awareness", "a fraud-awareness message", "It warns about fraud and points to official channels without asking you for anything."),
+    ({"otp_dont_share", "valid_for"}, "otp", "a one-time password (OTP) message", "It gives you a code for something you started yourself and warns you not to share it."),
+    ({"transaction_ref"}, "bank", "a bank or payment alert", "It reports a payment with a reference number and asks you for nothing."),
+    ({"no_fee", "event_result"}, "chat", "an ordinary notice", "It informs you about something and asks for no payment."),
     ({"planned_notice"}, "notice", "a service or maintenance notice", "It informs you of a scheduled event with a date and time, and asks for nothing."),
     ({"shop_offer"}, "offer", "an ordinary shopping offer", "It is a normal discount or reward and asks for no payment or personal details."),
     ({"link_official"}, "general", "a message with an official link", "Its link goes to the organisation's real website."),
@@ -126,7 +137,18 @@ def explain_genuine(result) -> dict:
     checks = list(DOMAIN_CHECKS[domain])
     if domain in DISGUISE_DOMAINS:
         checks.append(({"disguised"}, "Written normally – no disguised letters or hidden characters"))
-    passed = [text for bad, text in checks if not (bad & rules)]
+    # Never claim "does not ask for money / codes" when the words are right there, even if no red flag fired
+    # (e.g. a supplier asking you to pay an old bill: genuine, but it DOES ask for money).
+    text = normalize(result.text).text
+    asks_money = bool(MONEY_WORDS.search(text))
+    asks_code = bool(CODE_WORDS.search(text)) and not good_ids & {"otp_dont_share", "handover_code"}
+    passed = [txt for bad, txt in checks if not (bad & rules)
+              and not (asks_money and bad & MONEY) and not (asks_code and bad & S)]
+    notes = []
+    if asks_money:
+        notes.append("It does ask for a payment. Before paying, confirm the person and the amount yourself through a number you already know.")
+    if asks_code:
+        notes.append("It mentions a code or PIN. Only use it yourself – never share it with anyone who calls or messages you.")
     n_checks = len(checks)
     links = result.links
     if domain in LINK_DOMAINS or links:
@@ -141,12 +163,17 @@ def explain_genuine(result) -> dict:
         if "registered business sender" in result.sender_note:
             passed.append("Sent from a registered business sender ID (TRAI format)")
 
-    cautions = list(dict.fromkeys(CAUTION[f.rule] for f in good if f.rule in CAUTION))[:2]
-    if domain == "chat":
+    only_for = {"otp_dont_share": "otp", "valid_for": "otp", "awareness": "awareness", "handover_code": "delivery"}
+    cautions = notes + list(dict.fromkeys(CAUTION[f.rule] for f in good if f.rule in CAUTION
+                                          and only_for.get(f.rule, domain) == domain))[:2]
+    if domain == "chat" and not asks_money:
         cautions.append(CHAT_CAUTION)
     cautions += GENERAL[: 2 if not cautions else 1]
+    if asks_money or asks_code or result.red_flags:
+        # only claim what is true: the generic "asks for nothing" sentence is replaced by a neutral one
+        kind_why = "No strong scam signs were found, but read the points below before you act."
     return {
-        "summary": f"This looks like {kind}. {kind_why}",
+        "summary": f"This looks like {kind}. {kind_why}" if result.verdict == "SAFE" else None,
         "kind": kind,
         "domain": domain,
         "good_signs": [{"label": f.label, "text": f.text, "reason": f.reason} for f in good],
